@@ -77,9 +77,9 @@ import UIKit
 
 // Second attempt
 
-let celsius = 25.0
-var symbol = "°F"
-let fahrenheit = "\((celsius * 9/5) + 32)\(symbol)"
+//let celsius = 25.0
+//var symbol = "°F"
+//let fahrenheit = "\((celsius * 9/5) + 32)\(symbol)"
 
 
  
