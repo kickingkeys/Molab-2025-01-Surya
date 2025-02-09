@@ -5,6 +5,113 @@
 //  Created by Surya Narreddi on 09/02/25.
 //
 
+/*
+ 
+ INITIALIZE GAME COMPONENTS:
+     - Set up game states (ball position, velocity, score, etc.)
+     - Configure field dimensions and positions
+     - Set up animation timers
+
+ DEFINE GAME ELEMENTS:
+     1. Field Elements:
+         - Draw horizontal goal line
+         - Draw penalty box
+         - Draw D-arc (semi-circle)
+         - Set opacity and line width
+
+     2. Particle System (for confetti):
+         - Initialize particle properties (position, angle, speed)
+         - Create random colored circles
+         - Animate particles in random directions
+         - Define particle motion behavior
+
+     3. Ball:
+         - Create white circle with shadow
+         - Add gesture recognition
+         - Track position and velocity
+         - Apply physics (friction, bouncing)
+
+     4. Goal:
+         - Create moving white rectangle
+         - Define movement boundaries
+         - Set movement speed and direction
+
+     5. Power/Direction Indicators:
+         - Create gradient power line (green to red)
+         - Create direction arrow
+         - Calculate lengths based on drag distance
+
+ MAIN GAME LOOP:
+     Every 1/60th second:
+         1. Update goal position:
+             - Move goal left/right
+             - Reverse direction at boundaries
+
+         2. If ball is moving:
+             - Update ball position using velocity
+             - Apply friction (0.99 multiplier)
+             - Check for collisions:
+                 IF hits side walls:
+                     - Bounce with 0.8 elasticity
+                     - Keep within bounds
+                 
+                 IF crosses goal line:
+                     IF aligned with goal:
+                         - Increment score
+                         - Show confetti
+                         - Reset ball position
+                     ELSE:
+                         - Wait 0.5 seconds
+                         - Animate ball back to start
+                 
+                 IF ball stops (speed < 0.1):
+                     - Set ball to stationary
+
+ HANDLE USER INTERACTIONS:
+     ON DRAG START:
+         - Record drag start position
+         - Show power and direction indicators
+
+     ON DRAG END:
+         - Calculate drag distance and direction
+         - Normalize direction vector
+         - Apply power (0.065 * distance)
+         - Set ball in motion
+
+ HELPER FUNCTIONS:
+     1. Reset Ball:
+         - Stop ball movement
+         - Reset velocity to zero
+         - Position at screen bottom center
+         - Apply animation if needed
+
+     2. Update Goal Position:
+         - Move goal horizontally
+         - Check screen boundaries
+         - Reverse direction when needed
+
+     3. Calculate Power:
+         - Get distance from drag
+         - Apply power multiplier
+         - Normalize direction vector
+
+     4. Draw Power Indicators:
+         - Show gradient line behind ball
+         - Show arrow in front of ball
+         - Scale based on drag distance
+
+ VISUAL EFFECTS:
+     1. Ball Shadow:
+         - Add drop shadow below
+         - Add highlight overlay
+
+     2. Confetti Effect:
+         - Trigger on goal scored
+         - Animate multiple colored particles
+         - Fade out after 1 second
+ 
+ */
+
 import SwiftUI
 
 // MARK: - Particle System
