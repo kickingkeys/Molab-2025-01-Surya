@@ -15,7 +15,7 @@
  DEFINE GAME ELEMENTS:
      1. Field Elements:
          - Draw horizontal goal line
-         - Draw penalty box
+         - Draw penalty boxx
          - Draw D-arc (semi-circle)
          - Set opacity and line width
 
