@@ -2,7 +2,7 @@ import SwiftUI
 import AVFoundation
 
 @main
-struct Assignment_05PomodoroApp: App {  // Change name to match your project
+struct Assignment_05PomodoroApp: App {
     @State private var pomodoroModel = PomodoroModel()
     
     init() {
@@ -23,7 +23,6 @@ struct Assignment_05PomodoroApp: App {  // Change name to match your project
             forName: AVAudioSession.interruptionNotification,
             object: nil,
             queue: .main) { notification in
-               
                 
                 if let userInfo = notification.userInfo,
                    let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
@@ -35,9 +34,11 @@ struct Assignment_05PomodoroApp: App {  // Change name to match your project
                     } else if type == .ended {
                         if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt,
                            AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume) {
-                            // Interruption ended, resume playback
-                            self.pomodoroModel.start()
-                            self.pomodoroModel.playAudioForCurrentSession()
+                            // Only resume if it was active before
+                            if self.pomodoroModel.isActive {
+                                self.pomodoroModel.start()
+                                self.pomodoroModel.playAudioForCurrentSession()
+                            }
                         }
                     }
                 }

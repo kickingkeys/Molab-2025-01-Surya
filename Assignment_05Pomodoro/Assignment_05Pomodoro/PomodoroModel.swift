@@ -24,6 +24,9 @@ class PomodoroModel {
     var notificationSoundName: String = "session_chime"
     var notificationPlayer: AVAudioPlayer?
     
+    // Error states
+    var audioError: Bool = false
+    
     enum SessionType {
         case focus
         case shortBreak
@@ -80,8 +83,7 @@ class PomodoroModel {
         }
         
         setTimeBasedOnSessionType()
-        playAudioForCurrentSession()
-        start() // Auto-start next session
+        start() // Auto-start next session and play audio
     }
     
     // Set the time remaining based on the current session type
@@ -103,9 +105,14 @@ class PomodoroModel {
             do {
                 notificationPlayer = try AVAudioPlayer(contentsOf: url)
                 notificationPlayer?.play()
+                audioError = false
             } catch {
                 print("Could not play notification sound: \(error)")
+                audioError = true
             }
+        } else {
+            print("Notification sound file not found: \(notificationSoundName).mp3")
+            audioError = true
         }
     }
     
@@ -126,9 +133,14 @@ class PomodoroModel {
                 audioPlayer = try AVAudioPlayer(contentsOf: url)
                 audioPlayer?.numberOfLoops = -1 // Loop indefinitely
                 audioPlayer?.play()
+                audioError = false
             } catch {
                 print("Could not play audio file: \(error)")
+                audioError = true
             }
+        } else {
+            print("Audio file not found: \(audioName).mp3")
+            audioError = true
         }
     }
     
@@ -148,5 +160,6 @@ class PomodoroModel {
     deinit {
         timer?.invalidate()
         stopAudio()
+        notificationPlayer?.stop()
     }
 }

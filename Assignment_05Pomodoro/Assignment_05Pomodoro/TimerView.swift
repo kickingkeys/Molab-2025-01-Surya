@@ -1,10 +1,3 @@
-//
-//  TimerView.swift
-//  Assignment_05Pomodoro
-//
-//  Created by Surya Narreddi on 13/03/25.
-//
-
 import SwiftUI
 
 struct TimerView: View {
@@ -87,10 +80,12 @@ struct TimerView: View {
                 // Session dots
                 HStack(spacing: 12) {
                     ForEach(0..<model.sessionsBeforeLongBreak, id: \.self) { index in
+                        let currentPos = model.completedSessions % model.sessionsBeforeLongBreak
+                        let isCompleted = (index < currentPos) ||
+                                        (currentPos == 0 && model.completedSessions > 0)
+                        
                         Circle()
-                            .fill(index < model.completedSessions % model.sessionsBeforeLongBreak ||
-                                  (index == 0 && model.completedSessions % model.sessionsBeforeLongBreak == 0 && model.completedSessions > 0) ?
-                                  Color("AccentOrange") : Color("AccentOrange").opacity(0.3))
+                            .fill(isCompleted ? Color("AccentOrange") : Color("AccentOrange").opacity(0.3))
                             .frame(width: 12, height: 12)
                     }
                 }
@@ -113,12 +108,24 @@ struct TimerView: View {
                     )
                 }
                 .padding(.top, 20)
+                
+                if model.audioError {
+                    Text("Audio file issue detected. Check that focus_ambient.mp3, break_relax.mp3, and session_chime.mp3 are in the project.")
+                        .font(.callout)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                }
             }
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showMusicSelection) {
             MusicSelectionView(model: model)
+        }
+        .onAppear {
+            // Check if audio files exist on startup
+            checkAudioFiles()
         }
     }
     
@@ -145,7 +152,17 @@ struct TimerView: View {
             return 1.0 - CGFloat(model.timeRemaining) / CGFloat(model.longBreakTime)
         }
     }
+    
+    // Check if all required audio files exist
+    private func checkAudioFiles() {
+        let fileNames = ["focus_ambient", "break_relax", "session_chime"]
+        for name in fileNames {
+            if Bundle.main.path(forResource: name, ofType: "mp3") == nil {
+                model.audioError = true
+                print("Missing audio file: \(name).mp3")
+                return
+            }
+        }
+        model.audioError = false
+    }
 }
-
-
-

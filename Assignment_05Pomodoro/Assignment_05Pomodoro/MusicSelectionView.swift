@@ -1,10 +1,3 @@
-//
-//  SwiftUI View.swift
-//  Assignment_05Pomodoro
-//
-//  Created by Surya Narreddi on 13/03/25.
-//
-
 import SwiftUI
 
 struct MusicSelectionView: View {
@@ -16,86 +9,77 @@ struct MusicSelectionView: View {
     let breakSounds = ["Break Relax"]
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color("BackgroundColor")
-                    .ignoresSafeArea()
-                
-                VStack(alignment: .leading, spacing: 25) {
-                    // Focus sounds
-                    Section {
-                        Text("Focus Session Sounds")
-                            .font(.system(.title3, design: .rounded))
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color("TextColor"))
-                            .padding(.bottom, 5)
-                        
-                        ForEach(focusSounds, id: \.self) { sound in
-                            SoundSelectionRow(
-                                title: sound,
-                                isSelected: model.focusAudioName == convertToFileName(sound),
-                                action: {
-                                    model.focusAudioName = convertToFileName(sound)
-                                    if model.currentSession == .focus {
-                                        model.stopAudio()
-                                        model.playAudioForCurrentSession()
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white)
-                            .shadow(color: Color("TextColor").opacity(0.05), radius: 5)
-                    )
+        // Removed the outer NavigationView
+        ZStack {
+            Color("BackgroundColor")
+                .ignoresSafeArea()
+            
+            VStack(alignment: .leading, spacing: 25) {
+                // Focus sounds
+                Section {
+                    Text("Focus Session Sounds")
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("TextColor"))
+                        .padding(.bottom, 5)
                     
-                    // Break sounds
-                    Section {
-                        Text("Break Session Sounds")
-                            .font(.system(.title3, design: .rounded))
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color("TextColor"))
-                            .padding(.bottom, 5)
-                        
-                        ForEach(breakSounds, id: \.self) { sound in
-                            SoundSelectionRow(
-                                title: sound,
-                                isSelected: model.breakAudioName == convertToFileName(sound),
-                                action: {
-                                    model.breakAudioName = convertToFileName(sound)
-                                    
-                                    if model.currentSession == .shortBreak || model.currentSession == .longBreak {
-                                        model.stopAudio()
-                                        model.playAudioForCurrentSession()
-                                    }
+                    ForEach(focusSounds, id: \.self) { sound in
+                        SoundSelectionRow(
+                            title: sound,
+                            isSelected: model.focusAudioName == convertToFileName(sound),
+                            action: {
+                                model.focusAudioName = convertToFileName(sound)
+                                if model.currentSession == .focus {
+                                    model.stopAudio()
+                                    model.playAudioForCurrentSession()
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white)
-                            .shadow(color: Color("TextColor").opacity(0.05), radius: 5)
-                    )
-                    
-                    Spacer()
                 }
                 .padding()
-            }
-            .navigationTitle("Music Selection")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .shadow(color: Color("TextColor").opacity(0.05), radius: 5)
+                )
+                
+                // Break sounds
+                Section {
+                    Text("Break Session Sounds")
+                        .font(.system(.title3, design: .rounded))
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color("TextColor"))
+                        .padding(.bottom, 5)
+                    
+                    ForEach(breakSounds, id: \.self) { sound in
+                        SoundSelectionRow(
+                            title: sound,
+                            isSelected: model.breakAudioName == convertToFileName(sound),
+                            action: {
+                                model.breakAudioName = convertToFileName(sound)
+                                
+                                if model.currentSession == .shortBreak || model.currentSession == .longBreak {
+                                    model.stopAudio()
+                                    model.playAudioForCurrentSession()
+                                }
+                            }
+                        )
                     }
-                    .foregroundColor(Color("AccentOrange"))
                 }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .shadow(color: Color("TextColor").opacity(0.05), radius: 5)
+                )
+                
+                Spacer()
             }
+            .padding()
         }
+        .navigationTitle("Music Selection")
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     // Helper to convert display names to file names
@@ -104,6 +88,7 @@ struct MusicSelectionView: View {
     }
 }
 
+// This struct needs to be in the same file
 struct SoundSelectionRow: View {
     let title: String
     let isSelected: Bool
@@ -125,11 +110,5 @@ struct SoundSelectionRow: View {
             }
             .padding(.vertical, 8)
         }
-    }
-}
-
-struct SoundSelectionRow_Previews: PreviewProvider {
-    static var previews: some View {
-        SoundSelectionRow(title: "Sample Sound", isSelected: true, action: {})
     }
 }
