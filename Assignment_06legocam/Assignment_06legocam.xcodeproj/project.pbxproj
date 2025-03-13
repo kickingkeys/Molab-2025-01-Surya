@@ -1,0 +1,573 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		D63400CA2D839012000A41A1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D63400B12D839011000A41A1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D63400B82D839011000A41A1;
+			remoteInfo = Assignment_06legocam;
+		};
+		D63400D42D839012000A41A1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D63400B12D839011000A41A1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D63400B82D839011000A41A1;
+			remoteInfo = Assignment_06legocam;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D63400B92D839011000A41A1 /* Assignment_06legocam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Assignment_06legocam.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D63400C92D839012000A41A1 /* Assignment_06legocamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Assignment_06legocamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D63400D32D839012000A41A1 /* Assignment_06legocamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Assignment_06legocamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D63400BB2D839011000A41A1 /* Assignment_06legocam */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Assignment_06legocam;
+			sourceTree = "<group>";
+		};
+		D63400CC2D839012000A41A1 /* Assignment_06legocamTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Assignment_06legocamTests;
+			sourceTree = "<group>";
+		};
+		D63400D62D839012000A41A1 /* Assignment_06legocamUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Assignment_06legocamUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D63400B62D839011000A41A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D63400C62D839012000A41A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D63400D02D839012000A41A1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D63400B02D839011000A41A1 = {
+			isa = PBXGroup;
+			children = (
+				D63400BB2D839011000A41A1 /* Assignment_06legocam */,
+				D63400CC2D839012000A41A1 /* Assignment_06legocamTests */,
+				D63400D62D839012000A41A1 /* Assignment_06legocamUITests */,
+				D63400BA2D839011000A41A1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D63400BA2D839011000A41A1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D63400B92D839011000A41A1 /* Assignment_06legocam.app */,
+				D63400C92D839012000A41A1 /* Assignment_06legocamTests.xctest */,
+				D63400D32D839012000A41A1 /* Assignment_06legocamUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D63400B82D839011000A41A1 /* Assignment_06legocam */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D63400DD2D839012000A41A1 /* Build configuration list for PBXNativeTarget "Assignment_06legocam" */;
+			buildPhases = (
+				D63400B52D839011000A41A1 /* Sources */,
+				D63400B62D839011000A41A1 /* Frameworks */,
+				D63400B72D839011000A41A1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D63400BB2D839011000A41A1 /* Assignment_06legocam */,
+			);
+			name = Assignment_06legocam;
+			packageProductDependencies = (
+			);
+			productName = Assignment_06legocam;
+			productReference = D63400B92D839011000A41A1 /* Assignment_06legocam.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D63400C82D839012000A41A1 /* Assignment_06legocamTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D63400E02D839012000A41A1 /* Build configuration list for PBXNativeTarget "Assignment_06legocamTests" */;
+			buildPhases = (
+				D63400C52D839012000A41A1 /* Sources */,
+				D63400C62D839012000A41A1 /* Frameworks */,
+				D63400C72D839012000A41A1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D63400CB2D839012000A41A1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D63400CC2D839012000A41A1 /* Assignment_06legocamTests */,
+			);
+			name = Assignment_06legocamTests;
+			packageProductDependencies = (
+			);
+			productName = Assignment_06legocamTests;
+			productReference = D63400C92D839012000A41A1 /* Assignment_06legocamTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D63400D22D839012000A41A1 /* Assignment_06legocamUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D63400E32D839012000A41A1 /* Build configuration list for PBXNativeTarget "Assignment_06legocamUITests" */;
+			buildPhases = (
+				D63400CF2D839012000A41A1 /* Sources */,
+				D63400D02D839012000A41A1 /* Frameworks */,
+				D63400D12D839012000A41A1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D63400D52D839012000A41A1 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D63400D62D839012000A41A1 /* Assignment_06legocamUITests */,
+			);
+			name = Assignment_06legocamUITests;
+			packageProductDependencies = (
+			);
+			productName = Assignment_06legocamUITests;
+			productReference = D63400D32D839012000A41A1 /* Assignment_06legocamUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D63400B12D839011000A41A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					D63400B82D839011000A41A1 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					D63400C82D839012000A41A1 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = D63400B82D839011000A41A1;
+					};
+					D63400D22D839012000A41A1 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = D63400B82D839011000A41A1;
+					};
+				};
+			};
+			buildConfigurationList = D63400B42D839011000A41A1 /* Build configuration list for PBXProject "Assignment_06legocam" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D63400B02D839011000A41A1;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D63400BA2D839011000A41A1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D63400B82D839011000A41A1 /* Assignment_06legocam */,
+				D63400C82D839012000A41A1 /* Assignment_06legocamTests */,
+				D63400D22D839012000A41A1 /* Assignment_06legocamUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D63400B72D839011000A41A1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D63400C72D839012000A41A1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D63400D12D839012000A41A1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D63400B52D839011000A41A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D63400C52D839012000A41A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D63400CF2D839012000A41A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D63400CB2D839012000A41A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D63400B82D839011000A41A1 /* Assignment_06legocam */;
+			targetProxy = D63400CA2D839012000A41A1 /* PBXContainerItemProxy */;
+		};
+		D63400D52D839012000A41A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D63400B82D839011000A41A1 /* Assignment_06legocam */;
+			targetProxy = D63400D42D839012000A41A1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D63400DB2D839012000A41A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D63400DC2D839012000A41A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D63400DE2D839012000A41A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Assignment_06legocam/Preview Content\"";
+				DEVELOPMENT_TEAM = GUN8SN6KGJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Assignment-06legocam-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "This app needs camera access to create LEGO-style videos and photos";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs microphone access to record audio with your LEGO-style videos";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs permission to save LEGO-style photos and videos to your library";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to save LEGO-style photos and videos to your library";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MoLab.Assignment-06legocam";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D63400DF2D839012000A41A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Assignment_06legocam/Preview Content\"";
+				DEVELOPMENT_TEAM = GUN8SN6KGJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Assignment-06legocam-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "This app needs camera access to create LEGO-style videos and photos";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs microphone access to record audio with your LEGO-style videos";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs permission to save LEGO-style photos and videos to your library";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to save LEGO-style photos and videos to your library";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MoLab.Assignment-06legocam";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D63400E12D839012000A41A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GUN8SN6KGJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MoLab.Assignment-06legocamTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Assignment_06legocam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Assignment_06legocam";
+			};
+			name = Debug;
+		};
+		D63400E22D839012000A41A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GUN8SN6KGJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MoLab.Assignment-06legocamTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Assignment_06legocam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Assignment_06legocam";
+			};
+			name = Release;
+		};
+		D63400E42D839012000A41A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GUN8SN6KGJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MoLab.Assignment-06legocamUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Assignment_06legocam;
+			};
+			name = Debug;
+		};
+		D63400E52D839012000A41A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GUN8SN6KGJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MoLab.Assignment-06legocamUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Assignment_06legocam;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D63400B42D839011000A41A1 /* Build configuration list for PBXProject "Assignment_06legocam" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D63400DB2D839012000A41A1 /* Debug */,
+				D63400DC2D839012000A41A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D63400DD2D839012000A41A1 /* Build configuration list for PBXNativeTarget "Assignment_06legocam" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D63400DE2D839012000A41A1 /* Debug */,
+				D63400DF2D839012000A41A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D63400E02D839012000A41A1 /* Build configuration list for PBXNativeTarget "Assignment_06legocamTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D63400E12D839012000A41A1 /* Debug */,
+				D63400E22D839012000A41A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D63400E32D839012000A41A1 /* Build configuration list for PBXNativeTarget "Assignment_06legocamUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D63400E42D839012000A41A1 /* Debug */,
+				D63400E52D839012000A41A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D63400B12D839011000A41A1 /* Project object */;
+}
