@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AB20D8AC2D83CB1B0035E313 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = AB20D8AB2D83CB1B0035E313 /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D63400CA2D839012000A41A1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AB20D8AB2D83CB1B0035E313 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D63400B92D839011000A41A1 /* Assignment_06legocam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Assignment_06legocam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D63400C92D839012000A41A1 /* Assignment_06legocamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Assignment_06legocamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D63400D32D839012000A41A1 /* Assignment_06legocamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Assignment_06legocamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +80,7 @@
 		D63400B02D839011000A41A1 = {
 			isa = PBXGroup;
 			children = (
+				AB20D8AB2D83CB1B0035E313 /* README.md */,
 				D63400BB2D839011000A41A1 /* Assignment_06legocam */,
 				D63400CC2D839012000A41A1 /* Assignment_06legocamTests */,
 				D63400D62D839012000A41A1 /* Assignment_06legocamUITests */,
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB20D8AC2D83CB1B0035E313 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +408,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Assignment-06legocam-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "This app needs camera access to create LEGO-style videos and photos";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camer for lego errect";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs microphone access to record audio with your LEGO-style videos";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs permission to save LEGO-style photos and videos to your library";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to save LEGO-style photos and videos to your library";
@@ -435,6 +443,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Assignment-06legocam-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "This app needs camera access to create LEGO-style videos and photos";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camer for lego errect";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs microphone access to record audio with your LEGO-style videos";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs permission to save LEGO-style photos and videos to your library";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to save LEGO-style photos and videos to your library";
