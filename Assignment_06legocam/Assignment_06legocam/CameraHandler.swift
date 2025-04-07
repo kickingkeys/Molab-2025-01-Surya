@@ -239,7 +239,7 @@ extension CameraHandler: AVCaptureFileOutputRecordingDelegate {
             applyLegoEffectToVideo(at: url)
         }
     }
-    
+     
     private func applyLegoEffectToVideo(at url: URL) {
         // Process video with LEGO effect
         VideoProcessor.processVideo(inputURL: url, legoSize: legoSize) { result in
