@@ -1,5 +1,7 @@
 import SwiftUI
 
+@State private var isShowingTaskList = false
+
 struct TodoListView: View {
     @State private var taskText = ""
     @State private var currentDate = Date()
@@ -92,7 +94,9 @@ struct TodoListView: View {
                         )
                     }
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        isShowingTaskList = true
+                    }) {
                         HStack {
                             Image(systemName: "wand.and.stars")
                                 .foregroundColor(.white)
@@ -104,6 +108,9 @@ struct TodoListView: View {
                         .padding(.vertical, 15)
                         .background(ThemeColors.accent)
                         .cornerRadius(25)
+                    }
+                    .navigationDestination(isPresented: $isShowingTaskList) {
+                        TaskListView()
                     }
                 }
                 .padding(.horizontal, 20)
