@@ -1,10 +1,3 @@
-//
-//  TaskListView.swift
-//  Thoughtsort_UI
-//
-//  Created by Surya Narreddi on 21/04/25.
-//
-
 import SwiftUI
 
 struct TaskListView: View {
@@ -23,7 +16,24 @@ struct TaskListView: View {
                 .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
-                // Header
+                // Header with back button
+                HStack(alignment: .center) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(.blue)
+                            Text("Back")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(.top, 5)
+                .padding(.leading, 20)
+                
+                // Title and timestamp
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Today's Tasks")
                         .font(.system(size: 28, weight: .medium))
@@ -34,7 +44,7 @@ struct TaskListView: View {
                         .foregroundColor(ThemeColors.textDark)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
+                .padding(.top, 15)
                 
                 // Divider
                 Rectangle()
@@ -112,25 +122,8 @@ struct TaskListView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 15)
                 
-                // Action buttons
-                HStack(spacing: 12) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.left")
-                                .foregroundColor(ThemeColors.accent)
-                            
-                            Text("Go back")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(ThemeColors.accent)
-                        }
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 20)
-                    }
-                    .background(ThemeColors.background)
-                    .cornerRadius(25)
-                    
+                // Archive button (left-aligned)
+                HStack {
                     Button(action: {
                         // Archive action
                     }) {
@@ -151,11 +144,14 @@ struct TaskListView: View {
                         RoundedRectangle(cornerRadius: 25)
                             .stroke(ThemeColors.textDark, lineWidth: 0.5)
                     )
+                    
+                    Spacer()
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
@@ -163,4 +159,10 @@ struct Task: Identifiable {
     var id = UUID()
     var title: String
     var isCompleted: Bool
+}
+
+struct TaskListView_Previews: PreviewProvider {
+    static var previews: some View {
+        TaskListView()
+    }
 }

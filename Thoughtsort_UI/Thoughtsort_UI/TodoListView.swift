@@ -1,10 +1,9 @@
 import SwiftUI
 
-@State private var isShowingTaskList = false
-
 struct TodoListView: View {
     @State private var taskText = ""
     @State private var currentDate = Date()
+    @State private var isShowingTaskList = false
     @Environment(\.dismiss) private var dismiss
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -157,8 +156,16 @@ struct TodoListView: View {
                 .padding(.bottom, 15)
             }
         }
+        .navigationBarBackButtonHidden(true)
         .onAppear {
             currentDate = Date()
         }
+    }
+}
+
+// Preview provider
+struct TodoListView_Previews: PreviewProvider {
+    static var previews: some View {
+        TodoListView()
     }
 }
