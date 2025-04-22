@@ -1,7 +1,15 @@
-// TaskListView.swift
+//
+//  ArchivedListDetailView.swift
+//  Thoughtsort_UI
+//
+//  Created by Surya Narreddi on 21/04/25.
+//
+
 import SwiftUI
 
-struct TaskListView: View {
+struct ArchivedListDetailView: View {
+    let listTitle: String
+    let creationDate: String
     @State private var tasks = [
         Task(title: "Buy grocery from brooklyn bodega", isCompleted: false),
         Task(title: "Get beard trimmed", isCompleted: true),
@@ -36,11 +44,11 @@ struct TaskListView: View {
                 
                 // Title and timestamp
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Today's Tasks")
+                    Text(listTitle)
                         .font(.system(size: 28, weight: .medium))
                         .foregroundColor(ThemeColors.textDark)
                     
-                    Text("Edited on April 14, 2025, 10:07 PM")
+                    Text("Created on \(creationDate)")
                         .font(.system(size: 14))
                         .foregroundColor(ThemeColors.textDark)
                 }
@@ -58,7 +66,7 @@ struct TaskListView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(tasks.indices, id: \.self) { index in
                             HStack(spacing: 8) {
-                                // Task checkbox
+                                // Task checkbox (non-interactive in archive view)
                                 if tasks[index].isCompleted {
                                     ZStack {
                                         Circle()
@@ -81,89 +89,21 @@ struct TaskListView: View {
                                     .foregroundColor(ThemeColors.textDark)
                                     .strikethrough(tasks[index].isCompleted)
                             }
-                            .onTapGesture {
-                                tasks[index].isCompleted.toggle()
-                            }
                         }
-                        
-                        // Add task button
-                        HStack(spacing: 8) {
-                            ZStack {
-                                Rectangle()
-                                    .fill(ThemeColors.buttonLight)
-                                    .frame(width: 16, height: 16)
-                                    .cornerRadius(4)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(ThemeColors.accent, lineWidth: 0.5)
-                                    )
-                                
-                                Image(systemName: "plus")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(ThemeColors.accent)
-                            }
-                            
-                            Text("Add more items")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(ThemeColors.textDark)
-                        }
-                        .padding(.top, 5)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
                 }
                 
                 Spacer()
-                
-                // Footer text
-                Text("Every list is archived at the end of the day, and you can find them in your archived tab.")
-                    .font(.system(size: 14))
-                    .italic()
-                    .foregroundColor(ThemeColors.textDark.opacity(0.85))
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 15)
-                
-                // Archive button (left-aligned)
-                HStack {
-                    Button(action: {
-                        // Archive action
-                    }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "archivebox")
-                                .foregroundColor(ThemeColors.textDark)
-                            
-                            Text("Archive this list")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(ThemeColors.textDark)
-                        }
-                        .padding(.vertical, 16)
-                        .padding(.horizontal, 20)
-                    }
-                    .background(ThemeColors.background)
-                    .cornerRadius(25)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 25)
-                            .stroke(ThemeColors.textDark, lineWidth: 0.5)
-                    )
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
         }
         .navigationBarBackButtonHidden(true)
     }
 }
 
-struct Task: Identifiable {
-    var id = UUID()
-    var title: String
-    var isCompleted: Bool
-}
-
-struct TaskListView_Previews: PreviewProvider {
+struct ArchivedListDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        TaskListView()
+        ArchivedListDetailView(listTitle: "Grocery Day", creationDate: "April 14, 2025")
     }
 }

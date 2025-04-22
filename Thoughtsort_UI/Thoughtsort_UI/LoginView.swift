@@ -134,9 +134,8 @@ struct LoginView: View {
             .padding(.bottom, 20)
         }
         .navigationDestination(isPresented: $isLoggedIn) {
-            TodoListView()
-        }
-    }
+            HomeView()
+        }    }
 }
 
 
