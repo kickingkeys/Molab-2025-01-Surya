@@ -1,9 +1,15 @@
+//
+//  HomeView.swift
+//  Thoughtsort_UI
+//
+//  Created by Surya Narreddi on 21/04/25.
+//
+
 import SwiftUI
 
 struct HomeView: View {
     @State private var taskText = ""
     @State private var isShowingTaskList = false
-    @State private var showingArchive = false
     
     var body: some View {
         ZStack {
@@ -142,7 +148,7 @@ struct HomeView: View {
                 
                 // Tab bar
                 HStack(spacing: 0) {
-                    // Home tab (left side - active)
+                    // Home tab (left side)
                     HStack {
                         Spacer()
                         VStack(spacing: 5) {
@@ -159,27 +165,20 @@ struct HomeView: View {
                     .background(ThemeColors.buttonLight)
                     
                     // Archive tab (right side)
-                    Button(action: {
-                        showingArchive = true
-                    }) {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 5) {
-                                Image(systemName: "archivebox")
-                                    .foregroundColor(ThemeColors.textDark)
-                                Text("Archive")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(ThemeColors.textDark)
-                            }
-                            Spacer()
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 5) {
+                            Image(systemName: "archivebox")
+                                .foregroundColor(ThemeColors.textDark)
+                            Text("Archive")
+                                .font(.system(size: 12))
+                                .foregroundColor(ThemeColors.textDark)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(ThemeColors.inputBackground.opacity(0.5))
+                        Spacer()
                     }
-                    .navigationDestination(isPresented: $showingArchive) {
-                        ArchiveView()
-                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(ThemeColors.inputBackground.opacity(0.5))
                 }
                 .cornerRadius(10)
                 .padding(.horizontal, 20)

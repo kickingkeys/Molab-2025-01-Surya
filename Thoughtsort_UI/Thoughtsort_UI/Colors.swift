@@ -13,19 +13,19 @@ struct ThemeColors {
 
 struct ThemeTypography {
     // Editorial New fonts for headings
-    static let titleLarge = Font.custom("PPEditorialNew-Regular", size: 28)
-    static let titleMedium = Font.custom("PPEditorialNew-Regular", size: 24)
-    static let titleSmall = Font.custom("PPEditorialNew-Regular", size: 20)
+    static let titleLarge = Font.custom("PP Editorial New", size: 28)
+    static let titleMedium = Font.custom("PP Editorial New", size: 24)
+    static let titleSmall = Font.custom("PP Editorial New", size: 20)
     
     // Neue Montreal fonts for body text
-    static let bodyLarge = Font.custom("PPNeueMontreal-Medium", size: 16)
-    static let bodyRegular = Font.custom("PPNeueMontreal-Book", size: 14)
-    static let bodySmall = Font.custom("PPNeueMontreal-Book", size: 12)
+    static let bodyLarge = Font.custom("PP NeueMontreal Medium", size: 16)
+    static let bodyRegular = Font.custom("PP NeueMontreal Book", size: 14)
+    static let bodySmall = Font.custom("PP NeueMontreal Book", size: 12)
     
     // Special text styles
-    static let caption = Font.custom("PPNeueMontreal-Medium", size: 12)
-    static let button = Font.custom("PPNeueMontreal-Medium", size: 16)
-    static let tabLabel = Font.custom("PPNeueMontreal-Medium", size: 12)
+    static let caption = Font.custom("PP NeueMontreal Medium", size: 12)
+    static let button = Font.custom("PP NeueMontreal Medium", size: 16)
+    static let tabLabel = Font.custom("PP NeueMontreal Medium", size: 12)
 }
 
 // Helper extension for hex colors

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>PPEditorialNew-Italic.otf</string>
+		<string>PPEditorialNew-Regulat.otf</string>
+		<string>PPEditorialNew-Ultrabold.otf</string>
+		<string>PPEditorialNew-Ultrabolditalic.otf</string>
+		<string>PPEditorialNew-Ultralight.otf</string>
+		<string>PPEditorialNew-Ultralightitalic.otf</string>
+		<string>PPNeueMontreal-Bold</string>
+		<string>PPNeueMontreal-Book</string>
+		<string>PPNeueMontreal-Italic</string>
+		<string>PPNeueMontreal-Medium</string>
+		<string>PPNeueMontreal-SemiBolditalic</string>
+		<string>PPNeueMontreal-Thin</string>
+	</array>
+</dict>
+</plist>

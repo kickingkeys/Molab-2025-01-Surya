@@ -24,7 +24,7 @@ struct LaunchScreen: View {
                 
                 // App Name
                 Text("thoughtsort")
-                    .font(.system(size: 28, weight: .medium))
+                    .font(ThemeTypography.titleLarge)
                     .foregroundColor(ThemeColors.textDark)
             }
         }
