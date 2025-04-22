@@ -1,12 +1,4 @@
-//
-//  Colors.swift
-//  Thoughtsort_UI
-//
-//  Created by Surya Narreddi on 21/04/25.
-//
-
 import SwiftUI
-
 
 struct ThemeColors {
     static let background = Color(hex: "EFF0EA")
@@ -17,6 +9,23 @@ struct ThemeColors {
     static let buttonLight = Color(hex: "EFDCCD")
     static let white = Color(hex: "FFFFFF")
     static let black = Color(hex: "000000")
+}
+
+struct ThemeTypography {
+    // Editorial New fonts for headings
+    static let titleLarge = Font.custom("PPEditorialNew-Regular", size: 28)
+    static let titleMedium = Font.custom("PPEditorialNew-Regular", size: 24)
+    static let titleSmall = Font.custom("PPEditorialNew-Regular", size: 20)
+    
+    // Neue Montreal fonts for body text
+    static let bodyLarge = Font.custom("PPNeueMontreal-Medium", size: 16)
+    static let bodyRegular = Font.custom("PPNeueMontreal-Book", size: 14)
+    static let bodySmall = Font.custom("PPNeueMontreal-Book", size: 12)
+    
+    // Special text styles
+    static let caption = Font.custom("PPNeueMontreal-Medium", size: 12)
+    static let button = Font.custom("PPNeueMontreal-Medium", size: 16)
+    static let tabLabel = Font.custom("PPNeueMontreal-Medium", size: 12)
 }
 
 // Helper extension for hex colors
