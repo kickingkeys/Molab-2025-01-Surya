@@ -14,8 +14,8 @@ struct ThemeColors {
 struct ThemeTypography {
     // Editorial New fonts for headings
     static let titleLarge = Font.custom("PP Editorial New", size: 28)
-    static let titleMedium = Font.custom("PP Editorial New", size: 24)
-    static let titleSmall = Font.custom("PP Editorial New", size: 20)
+    static let titleMedium = Font.custom("PP Editorial New Regular", size: 24)
+    static let titleSmall = Font.custom("PP Editorial New Regular", size: 20)
     
     // Neue Montreal fonts for body text
     static let bodyLarge = Font.custom("PP NeueMontreal Medium", size: 16)
