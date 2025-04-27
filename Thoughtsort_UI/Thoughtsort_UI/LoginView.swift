@@ -5,7 +5,9 @@ struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var isLoggedIn = false
-    @StateObject private var sessionManager = UserSessionManager()
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @EnvironmentObject private var sessionManager: UserSessionManager
     
     var body: some View {
         ZStack {
@@ -57,7 +59,20 @@ struct LoginView: View {
                     HStack {
                         Spacer()
                         Button("Forgot your password?") {
-                            // Forgot password action
+                            if !email.isEmpty {
+                                sessionManager.resetPassword(email: email) { result in
+                                    switch result {
+                                    case .success:
+                                        alertMessage = "Password reset email sent to \(email)"
+                                    case .failure(let error):
+                                        alertMessage = "Error: \(error.localizedDescription)"
+                                    }
+                                    showAlert = true
+                                }
+                            } else {
+                                alertMessage = "Please enter your email address first"
+                                showAlert = true
+                            }
                         }
                         .foregroundColor(ThemeColors.accent)
                         .font(.system(size: 14))
@@ -66,8 +81,16 @@ struct LoginView: View {
                 
                 // Login button
                 Button {
-                    // Navigate to TodoListView
-                    isLoggedIn = true
+                    sessionManager.signInWithEmail(email: email, password: password) { result in
+                        switch result {
+                        case .success:
+                            // Navigation is handled by ContentView based on sessionManager.isLoggedIn
+                            print("Login successful")
+                        case .failure(let error):
+                            alertMessage = "Login failed: \(error.localizedDescription)"
+                            showAlert = true
+                        }
+                    }
                 } label: {
                     Text("Log in")
                         .font(.system(size: 18, weight: .medium))
@@ -100,7 +123,7 @@ struct LoginView: View {
                     sessionManager.signInWithGoogle()
                 } label: {
                     HStack {
-                        Image("google_icon") // Use system image as fallback
+                        Image(systemName: "globe") // Using system image as placeholder
                             .resizable()
                             .frame(width: 20, height: 20)
                         Text("Continue with Google")
@@ -125,7 +148,21 @@ struct LoginView: View {
                         .foregroundColor(ThemeColors.textDark)
                     
                     Button("Sign Up") {
-                        // Sign up action
+                        if !email.isEmpty && !password.isEmpty {
+                            sessionManager.createAccount(email: email, password: password) { result in
+                                switch result {
+                                case .success:
+                                    // Navigation is handled by ContentView
+                                    print("Account created successfully")
+                                case .failure(let error):
+                                    alertMessage = "Account creation failed: \(error.localizedDescription)"
+                                    showAlert = true
+                                }
+                            }
+                        } else {
+                            alertMessage = "Please enter email and password"
+                            showAlert = true
+                        }
                     }
                     .foregroundColor(ThemeColors.accent)
                     .fontWeight(.bold)
@@ -134,9 +171,25 @@ struct LoginView: View {
             .padding(.horizontal, 20)
             .padding(.top, 60)
             .padding(.bottom, 20)
-        }
-        .navigationDestination(isPresented: $isLoggedIn) {
-            HomeView()
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Message"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            }
+            
+            if sessionManager.isLoading {
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                    
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.accent))
+                        .scaleEffect(1.5)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .frame(width: 80, height: 80)
+                        )
+                }
+            }
         }
     }
 }

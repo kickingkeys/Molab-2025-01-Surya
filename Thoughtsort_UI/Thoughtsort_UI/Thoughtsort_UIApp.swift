@@ -10,10 +10,15 @@ import FirebaseCore
 
 @main
 struct Thoughtsort_UIApp: App {
-  @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-  var body: some Scene {
-    WindowGroup {
-      ContentView()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var sessionManager = UserSessionManager()
+    @StateObject private var taskListViewModel = TaskListViewModel()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(sessionManager)
+                .environmentObject(taskListViewModel)
+        }
     }
-  }
 }

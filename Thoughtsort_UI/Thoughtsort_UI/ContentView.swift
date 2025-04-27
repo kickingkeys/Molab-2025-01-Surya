@@ -1,14 +1,23 @@
-// ContentView.swift
 import SwiftUI
 
 struct ContentView: View {
     @State private var isShowingSplash = true
+    @EnvironmentObject var sessionManager: UserSessionManager
+    @EnvironmentObject var taskListViewModel: TaskListViewModel
     
     var body: some View {
         NavigationStack {
             ZStack {
                 if isShowingSplash {
                     LaunchScreen()
+                } else if sessionManager.isLoading {
+                    ProgressView("Loading...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                } else if sessionManager.isLoggedIn {
+                    HomeView()
+                        .onAppear {
+                            taskListViewModel.loadActiveLists()
+                        }
                 } else {
                     LoginView()
                 }
@@ -35,8 +44,4 @@ struct ContentView: View {
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
 }

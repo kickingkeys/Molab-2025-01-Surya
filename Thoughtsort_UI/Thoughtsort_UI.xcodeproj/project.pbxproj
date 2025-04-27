@@ -33,6 +33,9 @@
 		D6135F742DBE91CF008DF3D9 /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = D6135F732DBE91CF008DF3D9 /* FirebaseVertexAI */; };
 		D6135F792DBE94B5008DF3D9 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D6135F782DBE94B5008DF3D9 /* GoogleSignIn */; };
 		D6135F7B2DBE94B5008DF3D9 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D6135F7A2DBE94B5008DF3D9 /* GoogleSignInSwift */; };
+		D6135F842DBEAC06008DF3D9 /* TaskModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F822DBEAC04008DF3D9 /* TaskModel.swift */; };
+		D6135F872DBEAC10008DF3D9 /* TaskListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F852DBEAC0E008DF3D9 /* TaskListModel.swift */; };
+		D6135F8B2DBEAC29008DF3D9 /* FirestoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F892DBEAC28008DF3D9 /* FirestoreManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +56,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D6135F822DBEAC04008DF3D9 /* TaskModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskModel.swift; sourceTree = "<group>"; };
+		D6135F852DBEAC0E008DF3D9 /* TaskListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListModel.swift; sourceTree = "<group>"; };
+		D6135F892DBEAC28008DF3D9 /* FirestoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreManager.swift; sourceTree = "<group>"; };
+		D6135F912DBEACD0008DF3D9 /* TaskListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewModel.swift; sourceTree = "<group>"; };
 		D6FFCD1C2DB705FB00124233 /* Thoughtsort_UI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Thoughtsort_UI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6FFCD292DB705FD00124233 /* Thoughtsort_UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Thoughtsort_UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6FFCD332DB705FD00124233 /* Thoughtsort_UIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Thoughtsort_UIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -127,9 +134,37 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D6135F8C2DBEAC32008DF3D9 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				D6135F912DBEACD0008DF3D9 /* TaskListViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		D6135F8D2DBEAC41008DF3D9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D6135F852DBEAC0E008DF3D9 /* TaskListModel.swift */,
+				D6135F822DBEAC04008DF3D9 /* TaskModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D6135F8E2DBEAC88008DF3D9 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				D6135F892DBEAC28008DF3D9 /* FirestoreManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		D6FFCD132DB705FB00124233 = {
 			isa = PBXGroup;
 			children = (
+				D6135F8E2DBEAC88008DF3D9 /* Services */,
+				D6135F8D2DBEAC41008DF3D9 /* Models */,
+				D6135F8C2DBEAC32008DF3D9 /* ViewModels */,
 				D6FFCD1E2DB705FB00124233 /* Thoughtsort_UI */,
 				D6FFCD2C2DB705FD00124233 /* Thoughtsort_UITests */,
 				D6FFCD362DB705FD00124233 /* Thoughtsort_UIUITests */,
@@ -321,6 +356,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6135F8B2DBEAC29008DF3D9 /* FirestoreManager.swift in Sources */,
+				D6135F872DBEAC10008DF3D9 /* TaskListModel.swift in Sources */,
+				D6135F842DBEAC06008DF3D9 /* TaskModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
