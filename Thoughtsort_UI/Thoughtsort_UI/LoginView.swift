@@ -1,9 +1,11 @@
 import SwiftUI
+import FirebaseAuth
 
 struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var isLoggedIn = false
+    @StateObject private var sessionManager = UserSessionManager()
     
     var body: some View {
         ZStack {
@@ -95,7 +97,7 @@ struct LoginView: View {
                 
                 // Google button
                 Button {
-                    isLoggedIn = true
+                    sessionManager.signInWithGoogle()
                 } label: {
                     HStack {
                         Image("google_icon") // Use system image as fallback
@@ -135,7 +137,6 @@ struct LoginView: View {
         }
         .navigationDestination(isPresented: $isLoggedIn) {
             HomeView()
-        }    }
+        }
+    }
 }
-
-
