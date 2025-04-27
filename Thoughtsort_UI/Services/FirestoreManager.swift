@@ -1,10 +1,3 @@
-//
-//  FirestoreManager.swift
-//  Thoughtsort_UI
-//
-//  Created by Surya Narreddi on 27/04/25.
-//
-
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
@@ -157,6 +150,153 @@ class FirestoreManager: ObservableObject {
                     errorPointer?.pointee = error as NSError
                     return nil
                 }
+            }
+            
+            return nil
+        }) { (_, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    
+    // MARK: - New Task Management Methods
+    
+    // Add a single task to an existing task list
+    func addTask(to taskListId: String, taskTitle: String, completion: @escaping (Result<Task, Error>) -> Void) {
+        let ref = db.collection("taskLists").document(taskListId)
+        
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                try document = transaction.getDocument(ref)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            guard var taskList = try? document.data(as: TaskList.self) else {
+                let error = NSError(
+                    domain: "FirestoreManager",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Task list not found"]
+                )
+                errorPointer?.pointee = error
+                return nil
+            }
+            
+            // Create new task
+            let newTask = Task(
+                title: taskTitle,
+                isCompleted: false,
+                createdAt: Date()
+            )
+            
+            // Add task to list
+            taskList.tasks.append(newTask)
+            
+            // Update task list in Firestore
+            do {
+                try transaction.setData(from: taskList, forDocument: ref)
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+            
+            return newTask
+        }) { (result, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else if let newTask = result as? Task {
+                completion(.success(newTask))
+            } else {
+                completion(.failure(NSError(
+                    domain: "FirestoreManager",
+                    code: 500,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to add task"]
+                )))
+            }
+        }
+    }
+    
+    // Delete a task from a task list
+    func deleteTask(from taskListId: String, taskId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let ref = db.collection("taskLists").document(taskListId)
+        
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                try document = transaction.getDocument(ref)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            guard var taskList = try? document.data(as: TaskList.self) else {
+                let error = NSError(
+                    domain: "FirestoreManager",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Task list not found"]
+                )
+                errorPointer?.pointee = error
+                return nil
+            }
+            
+            // Remove task from list
+            taskList.tasks.removeAll(where: { $0.id == taskId })
+            
+            // Update task list in Firestore
+            do {
+                try transaction.setData(from: taskList, forDocument: ref)
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+            
+            return nil
+        }) { (_, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    
+    // Reorder tasks in a task list
+    func reorderTasks(taskListId: String, tasks: [Task], completion: @escaping (Result<Void, Error>) -> Void) {
+        let ref = db.collection("taskLists").document(taskListId)
+        
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                try document = transaction.getDocument(ref)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            guard var taskList = try? document.data(as: TaskList.self) else {
+                let error = NSError(
+                    domain: "FirestoreManager",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Task list not found"]
+                )
+                errorPointer?.pointee = error
+                return nil
+            }
+            
+            // Update tasks order
+            taskList.tasks = tasks
+            
+            // Update task list in Firestore
+            do {
+                try transaction.setData(from: taskList, forDocument: ref)
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
             }
             
             return nil

@@ -1,10 +1,3 @@
-//
-//  TaskListViewModel.swift
-//  Thoughtsort_UI
-//
-//  Created by Surya Narreddi on 27/04/25.
-//
-
 import Foundation
 import Combine
 
@@ -120,6 +113,77 @@ class TaskListViewModel: ObservableObject {
                 // Update both lists
                 self.loadActiveLists()
                 self.loadArchivedLists()
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    // MARK: - New Task Management Methods
+    
+    func addTask(to taskListId: String, taskTitle: String) {
+        isLoading = true
+        
+        firestoreManager.addTask(to: taskListId, taskTitle: taskTitle) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoading = false
+            
+            switch result {
+            case .success(let task):
+                // Update active lists locally if the task list is currently loaded
+                if let index = self.activeLists.firstIndex(where: { $0.id == taskListId }) {
+                    DispatchQueue.main.async {
+                        self.activeLists[index].tasks.append(task)
+                    }
+                } else {
+                    // Reload the lists if we can't find it locally
+                    self.loadActiveLists()
+                }
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    func deleteTask(from taskListId: String, taskId: String) {
+        firestoreManager.deleteTask(from: taskListId, taskId: taskId) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success():
+                // Update active lists locally
+                if let listIndex = self.activeLists.firstIndex(where: { $0.id == taskListId }) {
+                    DispatchQueue.main.async {
+                        self.activeLists[listIndex].tasks.removeAll(where: { $0.id == taskId })
+                    }
+                }
+            case .failure(let error):
+                DispatchQueue.main.async {
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    
+    func reorderTasks(taskListId: String, tasks: [Task]) {
+        isLoading = true
+        
+        firestoreManager.reorderTasks(taskListId: taskListId, tasks: tasks) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoading = false
+            
+            switch result {
+            case .success():
+                // Update active lists locally
+                if let listIndex = self.activeLists.firstIndex(where: { $0.id == taskListId }) {
+                    DispatchQueue.main.async {
+                        self.activeLists[listIndex].tasks = tasks
+                    }
+                }
             case .failure(let error):
                 DispatchQueue.main.async {
                     self.errorMessage = error.localizedDescription

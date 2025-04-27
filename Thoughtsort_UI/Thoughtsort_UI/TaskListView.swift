@@ -1,15 +1,15 @@
-// TaskListView.swift
 import SwiftUI
 
 struct TaskListView: View {
-    @State private var tasks = [
-        Task(title: "Buy grocery from brooklyn bodega", isCompleted: false),
-        Task(title: "Get beard trimmed", isCompleted: true),
-        Task(title: "Crib about Figma's new UI", isCompleted: false),
-        Task(title: "Complete project for this semester", isCompleted: false),
-        Task(title: "Touch grass", isCompleted: false)
-    ]
+    var taskListId: String = ""
+    @EnvironmentObject private var taskListViewModel: TaskListViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var newTaskTitle = ""
+    @State private var showingAddTask = false
+    
+    private var taskList: TaskList? {
+        taskListViewModel.activeLists.first(where: { $0.id == taskListId })
+    }
     
     var body: some View {
         ZStack {
@@ -36,13 +36,17 @@ struct TaskListView: View {
                 
                 // Title and timestamp
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Today's Tasks")
+                    Text(taskList?.title ?? "Today's Tasks")
                         .font(.system(size: 28, weight: .medium))
                         .foregroundColor(ThemeColors.textDark)
                     
-                    Text("Edited on April 14, 2025, 10:07 PM")
-                        .font(.system(size: 14))
-                        .foregroundColor(ThemeColors.textDark)
+                    if let createdAt = taskList?.createdAt {
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "MMMM d, yyyy, h:mm a"
+                        Text("Created on \(dateFormatter.string(from: createdAt))")
+                            .font(.system(size: 14))
+                            .foregroundColor(ThemeColors.textDark)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 15)
@@ -56,58 +60,68 @@ struct TaskListView: View {
                 // Task list
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        ForEach(tasks.indices, id: \.self) { index in
-                            HStack(spacing: 8) {
-                                // Task checkbox
-                                if tasks[index].isCompleted {
-                                    ZStack {
+                        if let taskList = taskList {
+                            ForEach(taskList.tasks) { task in
+                                HStack(spacing: 8) {
+                                    // Task checkbox
+                                    if task.isCompleted {
+                                        ZStack {
+                                            Circle()
+                                                .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
+                                                .frame(width: 16, height: 16)
+                                            
+                                            Circle()
+                                                .fill(ThemeColors.accent)
+                                                .frame(width: 10, height: 10)
+                                        }
+                                    } else {
                                         Circle()
                                             .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
                                             .frame(width: 16, height: 16)
-                                        
-                                        Circle()
-                                            .fill(ThemeColors.accent)
-                                            .frame(width: 10, height: 10)
                                     }
-                                } else {
-                                    Circle()
-                                        .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
-                                        .frame(width: 16, height: 16)
+                                    
+                                    // Task title
+                                    Text(task.title)
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(ThemeColors.textDark)
+                                        .strikethrough(task.isCompleted)
                                 }
-                                
-                                // Task title
-                                Text(tasks[index].title)
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(ThemeColors.textDark)
-                                    .strikethrough(tasks[index].isCompleted)
+                                .onTapGesture {
+                                    taskListViewModel.toggleTaskCompletion(taskListId: taskListId, taskId: task.id)
+                                }
                             }
-                            .onTapGesture {
-                                tasks[index].isCompleted.toggle()
-                            }
+                        } else {
+                            Text("Loading tasks...")
+                                .foregroundColor(ThemeColors.textLight)
+                                .padding()
                         }
                         
                         // Add task button
-                        HStack(spacing: 8) {
-                            ZStack {
-                                Rectangle()
-                                    .fill(ThemeColors.buttonLight)
-                                    .frame(width: 16, height: 16)
-                                    .cornerRadius(4)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(ThemeColors.accent, lineWidth: 0.5)
-                                    )
+                        Button(action: {
+                            showingAddTask = true
+                        }) {
+                            HStack(spacing: 8) {
+                                ZStack {
+                                    Rectangle()
+                                        .fill(ThemeColors.buttonLight)
+                                        .frame(width: 16, height: 16)
+                                        .cornerRadius(4)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(ThemeColors.accent, lineWidth: 0.5)
+                                        )
+                                    
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(ThemeColors.accent)
+                                }
                                 
-                                Image(systemName: "plus")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(ThemeColors.accent)
+                                Text("Add more items")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(ThemeColors.textDark)
                             }
-                            
-                            Text("Add more items")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(ThemeColors.textDark)
+                            .padding(.top, 5)
                         }
-                        .padding(.top, 5)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
@@ -126,7 +140,10 @@ struct TaskListView: View {
                 // Archive button (left-aligned)
                 HStack {
                     Button(action: {
-                        // Archive action
+                        if let id = taskList?.id {
+                            taskListViewModel.archiveTaskList(id)
+                            dismiss()
+                        }
                     }) {
                         HStack(spacing: 8) {
                             Image(systemName: "archivebox")
@@ -153,17 +170,35 @@ struct TaskListView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $showingAddTask) {
+            AddTaskView(taskListId: taskListId)
+        }
     }
 }
 
-struct Task: Identifiable {
-    var id = UUID()
-    var title: String
-    var isCompleted: Bool
-}
-
-struct TaskListView_Previews: PreviewProvider {
-    static var previews: some View {
-        TaskListView()
+// AddTaskView for adding new tasks
+struct AddTaskView: View {
+    var taskListId: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var taskTitle = ""
+    @EnvironmentObject private var taskListViewModel: TaskListViewModel
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                TextField("Task title", text: $taskTitle)
+                
+                Button("Add Task") {
+                    // Add task logic would go here
+                    // This requires updating our FirestoreManager to support adding individual tasks
+                    dismiss()
+                }
+                .disabled(taskTitle.isEmpty)
+            }
+            .navigationTitle("Add New Task")
+            .navigationBarItems(trailing: Button("Cancel") {
+                dismiss()
+            })
+        }
     }
 }
