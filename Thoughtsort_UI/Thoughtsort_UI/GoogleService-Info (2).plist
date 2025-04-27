@@ -15,16 +15,26 @@
 	<key>STORAGE_BUCKET</key>
 	<string>thoughtsortui.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:924905404484:ios:5104a8d4de262142cc6411</string>
+	<key>GIDClientID</key>
+	<string>924905404484-YOUR_CLIENT_ID_PART.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<string></string>
+	</array>
+	<key>CFBundleURLSchemes</key>
+	<array>
+		<string>com.googleusercontent.apps.924905404484-YOUR_CLIENT_ID_PART</string>
+	</array>
 </dict>
 </plist>
