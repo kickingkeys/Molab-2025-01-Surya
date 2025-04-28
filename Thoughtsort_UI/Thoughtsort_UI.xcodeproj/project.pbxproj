@@ -36,6 +36,7 @@
 		D6135F842DBEAC06008DF3D9 /* TaskModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F822DBEAC04008DF3D9 /* TaskModel.swift */; };
 		D6135F872DBEAC10008DF3D9 /* TaskListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F852DBEAC0E008DF3D9 /* TaskListModel.swift */; };
 		D6135F8B2DBEAC29008DF3D9 /* FirestoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F892DBEAC28008DF3D9 /* FirestoreManager.swift */; };
+		D6135F922DBF0345008DF3D9 /* TaskListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6135F912DBEACD0008DF3D9 /* TaskListViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -137,7 +138,6 @@
 		D6135F8C2DBEAC32008DF3D9 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				D6135F912DBEACD0008DF3D9 /* TaskListViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -169,6 +169,7 @@
 				D6FFCD2C2DB705FD00124233 /* Thoughtsort_UITests */,
 				D6FFCD362DB705FD00124233 /* Thoughtsort_UIUITests */,
 				D6FFCD1D2DB705FB00124233 /* Products */,
+				D6135F912DBEACD0008DF3D9 /* TaskListViewModel.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -359,6 +360,7 @@
 				D6135F8B2DBEAC29008DF3D9 /* FirestoreManager.swift in Sources */,
 				D6135F872DBEAC10008DF3D9 /* TaskListModel.swift in Sources */,
 				D6135F842DBEAC06008DF3D9 /* TaskModel.swift in Sources */,
+				D6135F922DBF0345008DF3D9 /* TaskListViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

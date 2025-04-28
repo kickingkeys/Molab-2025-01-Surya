@@ -41,10 +41,14 @@ struct TaskListView: View {
                         .foregroundColor(ThemeColors.textDark)
                     
                     if let createdAt = taskList?.createdAt {
-                        let dateFormatter = DateFormatter()
-                        dateFormatter.dateFormat = "MMMM d, yyyy, h:mm a"
+                        let dateFormatter: DateFormatter = {
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "MMMM d, yyyy, h:mm a"
+                            return formatter
+                        }()
+                        
                         Text("Created on \(dateFormatter.string(from: createdAt))")
-                            .font(.system(size: 14))
+                            .font(.system(size: 16))
                             .foregroundColor(ThemeColors.textDark)
                     }
                 }

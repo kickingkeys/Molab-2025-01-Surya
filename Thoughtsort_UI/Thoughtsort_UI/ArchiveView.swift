@@ -43,6 +43,12 @@ struct ArchiveView: View {
                     } else {
                         VStack(spacing: 12) {
                             ForEach(taskListViewModel.archivedLists) { list in
+                                let dateFormatter: DateFormatter = {
+                                    let formatter = DateFormatter()
+                                    formatter.dateFormat = "MMMM d, yyyy"
+                                    return formatter
+                                }()
+                                
                                 Button(action: {
                                     selectedListId = list.id
                                     showDetailView = true
@@ -51,9 +57,6 @@ struct ArchiveView: View {
                                         Text(list.title)
                                             .font(.system(size: 16, weight: .medium))
                                             .foregroundColor(ThemeColors.textDark)
-                                        
-                                        let dateFormatter = DateFormatter()
-                                        dateFormatter.dateFormat = "MMMM d, yyyy"
                                         
                                         HStack(spacing: 4) {
                                             Text("\(list.tasks.count) Items")

@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct ArchivedListDetailView: View {
     var listId: String
     @EnvironmentObject private var taskListViewModel: TaskListViewModel
@@ -39,8 +40,11 @@ struct ArchivedListDetailView: View {
                             .font(.system(size: 28, weight: .medium))
                             .foregroundColor(ThemeColors.textDark)
                         
-                        let dateFormatter = DateFormatter()
-                        dateFormatter.dateFormat = "MMMM d, yyyy"
+                        let dateFormatter: DateFormatter = {
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .long
+                            return formatter
+                        }()
                         Text("Created on \(dateFormatter.string(from: list.createdAt))")
                             .font(.system(size: 14))
                             .foregroundColor(ThemeColors.textDark)
