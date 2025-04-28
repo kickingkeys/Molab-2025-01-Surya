@@ -2,11 +2,10 @@
 //  TaskListViewModel.swift
 //  Thoughtsort_UI
 //
-//  Created by Surya Narreddi on 28/04/25.
-//
 
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
 
 @MainActor
 class TaskListViewModel: ObservableObject {
@@ -52,21 +51,17 @@ class TaskListViewModel: ObservableObject {
             }
     }
     
-    // Create a new Task List
+    // Create a new Task List (⚡ fixed)
     func createTaskList(title: String) {
-        let newList: [String: Any] = [
-            "id": UUID().uuidString,
-            "title": title,
-            "tasks": [],
-            "createdAt": Timestamp(date: Date()),
-            "isArchived": false,
-            "userId": "" // Future: set userId here after auth
-        ]
+        let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
+        var newTaskList = TaskList(title: title, userId: userId)
         
-        db.collection("taskLists").addDocument(data: newList) { error in
-            if let error = error {
-                print("Error creating task list: \(error.localizedDescription)")
-            }
+        do {
+            let taskListRef = db.collection("taskLists").document(newTaskList.id)
+            try taskListRef.setData(from: newTaskList)
+            print("✅ Successfully created task list with ID: \(newTaskList.id)")
+        } catch {
+            print("Error creating task list: \(error.localizedDescription)")
         }
     }
     
@@ -115,12 +110,13 @@ class TaskListViewModel: ObservableObject {
     
     // Archive a task list
     func archiveTaskList(_ listId: String) {
-        db.collection("taskLists").document(listId).updateData([
-            "isArchived": true
-        ]) { error in
+        let ref = db.collection("taskLists").document(listId)
+        
+        ref.updateData(["isArchived": true]) { error in
             if let error = error {
                 print("Error archiving task list: \(error.localizedDescription)")
             } else {
+                print("✅ Successfully archived task list.")
                 self.loadActiveLists()
             }
         }
@@ -133,7 +129,7 @@ class TaskListViewModel: ObservableObject {
                 print("Error deleting task list: \(error.localizedDescription)")
             } else {
                 DispatchQueue.main.async {
-                    self.loadActiveLists() // ✅ Reload active lists immediately after successful delete
+                    self.loadActiveLists()
                 }
             }
         }

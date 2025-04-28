@@ -83,10 +83,8 @@ struct TaskListView: View {
                         .focused($isTextFieldFocused)
                         .onSubmit {
                             addNewTask()
-                            newTaskTitle = ""
-                            isTextFieldFocused = false
                         }
-                } 
+                }
                 .padding(.horizontal, 20)
                 .padding(.top, 15)
 
@@ -123,8 +121,16 @@ struct TaskListView: View {
                                             .foregroundColor(ThemeColors.textDark)
                                             .strikethrough(task.isCompleted)
                                     }
+                                    .contentShape(Rectangle())
                                     .onTapGesture {
                                         taskListViewModel.toggleTaskCompletion(taskListId: taskListId, taskId: task.id)
+                                    }
+                                    .swipeActions {
+                                        Button(role: .destructive) {
+                                            taskListViewModel.deleteTask(taskListId: taskListId, taskId: task.id)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
                                     }
                                 }
                             }
