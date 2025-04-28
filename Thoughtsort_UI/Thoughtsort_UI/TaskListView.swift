@@ -2,8 +2,6 @@
 //  TaskListView.swift
 //  Thoughtsort_UI
 //
-//  Created by Surya Narreddi
-//
 
 import SwiftUI
 
@@ -14,8 +12,7 @@ struct TaskListView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var newTaskTitle = ""
-    @State private var showingAddTask = false
-    @State private var isTaskInputFocused = false
+    @FocusState private var isTextFieldFocused: Bool
 
     private var taskList: TaskList? {
         taskListViewModel.activeLists.first(where: { $0.id == taskListId })
@@ -28,8 +25,8 @@ struct TaskListView: View {
             
             VStack(alignment: .leading, spacing: 0) {
                 
-                // Header: Back button and title
-                HStack {
+                // Header
+                VStack(alignment: .leading, spacing: 5) {
                     Button(action: {
                         dismiss()
                     }) {
@@ -37,23 +34,30 @@ struct TaskListView: View {
                             .font(.title2)
                             .foregroundColor(ThemeColors.textDark)
                     }
-                    
-                    Spacer()
-                    
-                    Text(taskList?.title ?? "Today's Tasks")
-                        .font(.system(size: 24, weight: .semibold))
+                    .padding(.bottom, 5)
+
+                    Text("Tasks")
+                        .font(.system(size: 28, weight: .medium))
                         .foregroundColor(ThemeColors.textDark)
                     
-                    Spacer()
-                    
-                    // Placeholder spacer for alignment
-                    Spacer()
+                    if let createdAt = taskList?.createdAt {
+                        Text("Edited on \(formattedDateTime(date: createdAt))")
+                            .font(.system(size: 14))
+                            .foregroundColor(ThemeColors.textDark)
+                    }
+
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 1)
+                        .overlay(
+                            Rectangle()
+                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                                .foregroundColor(ThemeColors.textDark.opacity(0.3))
+                        )
+                        .padding(.top, 10)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 15)
-                
-                Divider()
-                    .padding(.top, 10)
+                .padding(.top, 20)
 
                 // Add new task input
                 HStack(spacing: 8) {
@@ -72,17 +76,21 @@ struct TaskListView: View {
                             .foregroundColor(ThemeColors.accent)
                     }
                     
-                    TextField("Add a new task...", text: $newTaskTitle, onCommit: {
-                        addNewTask()
-                    })
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(ThemeColors.textDark)
-                    .padding(.vertical, 12)
-                }
+                    TextField("Add a new task...", text: $newTaskTitle)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(ThemeColors.textDark)
+                        .padding(.vertical, 12)
+                        .focused($isTextFieldFocused)
+                        .onSubmit {
+                            addNewTask()
+                            newTaskTitle = ""
+                            isTextFieldFocused = false
+                        }
+                } 
                 .padding(.horizontal, 20)
                 .padding(.top, 15)
 
-                // Tasks list
+                // Tasks List
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
                         if let taskList = taskList {
@@ -129,74 +137,70 @@ struct TaskListView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
                 }
-                .background(ThemeColors.background)
 
                 Spacer()
 
-                // Archive List button
-                Button(action: {
-                    if let id = taskList?.id {
-                        taskListViewModel.archiveTaskList(id)
-                        dismiss()
+                // Archive Info and Button
+                VStack(alignment: .leading, spacing: 12) {
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 1)
+                        .overlay(
+                            Rectangle()
+                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                                .foregroundColor(ThemeColors.textDark.opacity(0.3))
+                        )
+
+                    Text("Every list is archived at the end of the day, and you can find them in your archived tab.")
+                        .font(.system(size: 14))
+                        .foregroundColor(ThemeColors.textLight)
+                        .padding(.top, 10)
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            if let id = taskList?.id {
+                                taskListViewModel.archiveTaskList(id)
+                                dismiss()
+                            }
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "archivebox")
+                                Text("Archive this list")
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 25)
+                                    .stroke(ThemeColors.textDark.opacity(0.3), lineWidth: 1)
+                            )
+                            .foregroundColor(ThemeColors.textDark)
+                        }
                     }
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "archivebox")
-                        Text("Archive List")
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(ThemeColors.buttonLight)
-                    .cornerRadius(10)
-                    .foregroundColor(ThemeColors.accent)
+                    .padding(.bottom, 20)
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
         }
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .tabBar) // ✅ Hide Tab Bar here
         .onAppear {
             taskListViewModel.loadActiveLists()
-        }
-        .sheet(isPresented: $showingAddTask) {
-            AddTaskView(taskListId: taskListId)
-                .environmentObject(taskListViewModel)
         }
     }
     
     private func addNewTask() {
         if !taskListId.isEmpty && !newTaskTitle.isEmpty {
             taskListViewModel.addTask(to: taskListId, taskTitle: newTaskTitle)
-            newTaskTitle = ""
+            newTaskTitle = "" // ✅ Clear after adding
+            isTextFieldFocused = false
         }
     }
-}
-
-// MARK: - AddTaskView
-
-struct AddTaskView: View {
-    var taskListId: String
-    @Environment(\.dismiss) private var dismiss
-    @State private var taskTitle = ""
-    @EnvironmentObject private var taskListViewModel: TaskListViewModel
-
-    var body: some View {
-        NavigationView {
-            Form {
-                TextField("Task title", text: $taskTitle)
-                
-                Button("Add Task") {
-                    if !taskTitle.isEmpty {
-                        taskListViewModel.addTask(to: taskListId, taskTitle: taskTitle)
-                        dismiss()
-                    }
-                }
-                .disabled(taskTitle.isEmpty)
-            }
-            .navigationTitle("Add New Task")
-            .navigationBarItems(trailing: Button("Cancel") {
-                dismiss()
-            })
-        }
+    
+    private func formattedDateTime(date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy, h:mm a"
+        return formatter.string(from: date)
     }
 }

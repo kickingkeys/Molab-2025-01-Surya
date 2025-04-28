@@ -202,9 +202,6 @@ struct HomeView: View {
                 Button("Delete", role: .destructive) {
                     if let list = listToDelete {
                         taskListViewModel.deleteTaskList(listId: list.id)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            taskListViewModel.loadActiveLists()
-                        }
                     }
                     listToDelete = nil
                 }

@@ -132,7 +132,9 @@ class TaskListViewModel: ObservableObject {
             if let error = error {
                 print("Error deleting task list: \(error.localizedDescription)")
             } else {
-                self.loadActiveLists()
+                DispatchQueue.main.async {
+                    self.loadActiveLists() // ✅ Reload active lists immediately after successful delete
+                }
             }
         }
     }
