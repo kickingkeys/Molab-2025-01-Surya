@@ -87,9 +87,9 @@ struct ArchiveView: View {
                                 }
                             }
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 15)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 15)
                 }
                 
                 Spacer()

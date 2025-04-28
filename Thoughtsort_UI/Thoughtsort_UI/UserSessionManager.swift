@@ -34,39 +34,56 @@ class UserSessionManager: ObservableObject {
         }
         let config = GIDConfiguration(clientID: clientID)
         
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootViewController = windowScene.windows.first?.rootViewController else {
-            isLoading = false
-            return
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first,
+              let rootVC = windowScene.windows
+            .first(where: { $0.isKeyWindow })?
+            .rootViewController else {
+                isLoading = false
+                return
         }
         
-        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { [weak self] signInResult, error in
+        GIDSignIn.sharedInstance.configuration = config
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { [weak self] result, error in
             guard let self = self else { return }
-            guard let result = signInResult, error == nil else {
-                self.isLoading = false
+            self.isLoading = false
+            
+            if let error = error {
+                print("Google Sign-In failed: \(error.localizedDescription)")
                 return
             }
             
-            guard let idToken = result.user.idToken?.tokenString else {
-                self.isLoading = false
+            guard let user = result?.user else {
+                print("Google Sign-In failed: no user object")
                 return
             }
-            let accessToken = result.user.accessToken.tokenString
             
-            let credential = GoogleAuthProvider.credential(
-                withIDToken: idToken,
-                accessToken: accessToken
-            )
+            // Proceed with authentication (exchange tokens with Firebase)
+            guard let idToken = user.idToken?.tokenString else {
+                return
+            }
+            
+            let accessToken = user.accessToken.tokenString
+            
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
             
             Auth.auth().signIn(with: credential) { authResult, error in
-                self.isLoading = false
+                if let error = error {
+                    print("Firebase Sign-In failed: \(error.localizedDescription)")
+                    return
+                }
+                
                 if let user = authResult?.user {
                     self.isLoggedIn = true
                     self.userEmail = user.email ?? ""
+                    print("User signed in successfully: \(user.email ?? "No Email")")
                 }
             }
         }
     }
+
     
     func signInWithEmail(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         isLoading = true

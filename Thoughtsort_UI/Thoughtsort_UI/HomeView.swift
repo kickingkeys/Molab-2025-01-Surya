@@ -39,22 +39,29 @@ struct HomeView: View {
                 // Input area
                 ZStack(alignment: .topLeading) {
                     TextEditor(text: $taskText)
-                        .padding()
+                        .scrollContentBackground(.hidden) // << THIS fixes the black
+                        .padding(12)
+                        .frame(height: 140)
                         .background(ThemeColors.inputBackground)
-                        .cornerRadius(12)
-                        .frame(height: 120)
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.clear, lineWidth: 0) // remove the border
+                        )
                         .padding(.horizontal, 20)
                         .padding(.top, 20)
-                    
+                        .font(.body)
+                        .foregroundColor(.primary)
+
                     if taskText.isEmpty {
                         Text("Feeling overwhelmed? Type everything you need to do here, and I'll help organise your thoughts...")
-                            .font(.system(size: 14))
-                            .foregroundColor(ThemeColors.textLight)
-                            .padding(.horizontal, 36)
-                            .padding(.top, 36)
-                            .allowsHitTesting(false)
+                            .foregroundColor(Color(.systemGray))
+                            .font(.body)
+                            .padding(.leading, 32)
+                            .padding(.top, 32)
                     }
                 }
+
                 
                 // Action buttons
                 HStack(spacing: 12) {
