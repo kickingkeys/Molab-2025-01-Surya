@@ -1,191 +1,202 @@
-import Foundation
-import FirebaseFirestore
+//
+//  TaskListView.swift
+//  Thoughtsort_UI
+//
+//  Created by Surya Narreddi
+//
 
-class TaskListViewModel: ObservableObject {
-    @Published var activeLists: [TaskList] = []
-    @Published var archivedLists: [TaskList] = []
-    
-    private var db = Firestore.firestore()
+import SwiftUI
 
-    init() {
-        loadActiveLists()
-        listenToArchivedLists()
-    }
+struct TaskListView: View {
+    var taskListId: String = ""
     
-    // Load Active Lists
-    func loadActiveLists() {
-        db.collection("taskLists")
-            .whereField("isArchived", isEqualTo: false)
-            .order(by: "createdAt", descending: true)
-            .addSnapshotListener { snapshot, error in
-                if let error = error {
-                    print("Error loading active lists: \(error.localizedDescription)")
-                    return
-                }
-                guard let documents = snapshot?.documents else { return }
+    @EnvironmentObject private var taskListViewModel: TaskListViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var newTaskTitle = ""
+    @State private var showingAddTask = false
+    @State private var isTaskInputFocused = false
+
+    private var taskList: TaskList? {
+        taskListViewModel.activeLists.first(where: { $0.id == taskListId })
+    }
+
+    var body: some View {
+        ZStack {
+            ThemeColors.background
+                .ignoresSafeArea()
+            
+            VStack(alignment: .leading, spacing: 0) {
                 
-                self.activeLists = documents.map { doc -> TaskList in
-                    self.parseTaskList(document: doc)
+                // Header: Back button and title
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.title2)
+                            .foregroundColor(ThemeColors.textDark)
+                    }
+                    
+                    Spacer()
+                    
+                    Text(taskList?.title ?? "Today's Tasks")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(ThemeColors.textDark)
+                    
+                    Spacer()
+                    
+                    // Placeholder spacer for alignment
+                    Spacer()
                 }
-            }
-    }
-    
-    // Load Archived Lists
-    func listenToArchivedLists() {
-        db.collection("taskLists")
-            .whereField("isArchived", isEqualTo: true)
-            .order(by: "createdAt", descending: true)
-            .addSnapshotListener { snapshot, error in
-                if let error = error {
-                    print("Error loading archived lists: \(error.localizedDescription)")
-                    return
-                }
-                guard let documents = snapshot?.documents else { return }
+                .padding(.horizontal, 20)
+                .padding(.top, 15)
                 
-                self.archivedLists = documents.map { doc -> TaskList in
-                    self.parseTaskList(document: doc)
+                Divider()
+                    .padding(.top, 10)
+
+                // Add new task input
+                HStack(spacing: 8) {
+                    ZStack {
+                        Rectangle()
+                            .fill(ThemeColors.buttonLight)
+                            .frame(width: 16, height: 16)
+                            .cornerRadius(4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(ThemeColors.accent, lineWidth: 0.5)
+                            )
+                        
+                        Image(systemName: "plus")
+                            .font(.system(size: 10))
+                            .foregroundColor(ThemeColors.accent)
+                    }
+                    
+                    TextField("Add a new task...", text: $newTaskTitle, onCommit: {
+                        addNewTask()
+                    })
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(ThemeColors.textDark)
+                    .padding(.vertical, 12)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 15)
+
+                // Tasks list
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if let taskList = taskList {
+                            if taskList.tasks.isEmpty {
+                                Text("No tasks yet. Start by adding one!")
+                                    .foregroundColor(ThemeColors.textLight)
+                                    .padding(.top, 50)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            } else {
+                                ForEach(taskList.tasks) { task in
+                                    HStack(spacing: 8) {
+                                        if task.isCompleted {
+                                            ZStack {
+                                                Circle()
+                                                    .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
+                                                    .frame(width: 16, height: 16)
+                                                
+                                                Circle()
+                                                    .fill(ThemeColors.accent)
+                                                    .frame(width: 10, height: 10)
+                                            }
+                                        } else {
+                                            Circle()
+                                                .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
+                                                .frame(width: 16, height: 16)
+                                        }
+                                        
+                                        Text(task.title)
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(ThemeColors.textDark)
+                                            .strikethrough(task.isCompleted)
+                                    }
+                                    .onTapGesture {
+                                        taskListViewModel.toggleTaskCompletion(taskListId: taskListId, taskId: task.id)
+                                    }
+                                }
+                            }
+                        } else {
+                            Text("Loading tasks...")
+                                .foregroundColor(ThemeColors.textLight)
+                                .padding()
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 15)
+                }
+                .background(ThemeColors.background)
+
+                Spacer()
+
+                // Archive List button
+                Button(action: {
+                    if let id = taskList?.id {
+                        taskListViewModel.archiveTaskList(id)
+                        dismiss()
+                    }
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "archivebox")
+                        Text("Archive List")
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(ThemeColors.buttonLight)
+                    .cornerRadius(10)
+                    .foregroundColor(ThemeColors.accent)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
-    }
-    
-    // Create a new Task List
-    func createTaskList(title: String) {
-        let newList: [String: Any] = [
-            "id": UUID().uuidString,
-            "title": title,
-            "tasks": [],
-            "createdAt": Timestamp(date: Date()),
-            "isArchived": false,
-            "userId": ""
-        ]
-        
-        db.collection("taskLists").addDocument(data: newList) { error in
-            if let error = error {
-                print("Error creating task list: \(error.localizedDescription)")
-            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            taskListViewModel.loadActiveLists()
+        }
+        .sheet(isPresented: $showingAddTask) {
+            AddTaskView(taskListId: taskListId)
+                .environmentObject(taskListViewModel)
         }
     }
     
-    // Add a task to an existing list
-    func addTask(to taskListId: String, taskTitle: String) {
-        guard let index = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
-        
-        let newTask = Task(
-            title: taskTitle,
-            isCompleted: false,
-            createdAt: Date()
-        )
-        
-        activeLists[index].tasks.append(newTask)
-        
-        let taskData = activeLists[index].tasks.map { [
-            "id": $0.id,
-            "title": $0.title,
-            "isCompleted": $0.isCompleted,
-            "createdAt": Timestamp(date: $0.createdAt)
-        ]}
-        
-        db.collection("taskLists").document(taskListId).updateData([
-            "tasks": taskData
-        ])
-    }
-    
-    // Toggle task completion
-    func toggleTaskCompletion(taskListId: String, taskId: String) {
-        guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
-        guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
-        
-        activeLists[listIndex].tasks[taskIndex].isCompleted.toggle()
-        
-        let updatedTasks = activeLists[listIndex].tasks.map { [
-            "id": $0.id,
-            "title": $0.title,
-            "isCompleted": $0.isCompleted,
-            "createdAt": Timestamp(date: $0.createdAt)
-        ]}
-        
-        db.collection("taskLists").document(taskListId).updateData([
-            "tasks": updatedTasks
-        ])
-    }
-    
-    // Archive a task list
-    func archiveTaskList(_ listId: String) {
-        db.collection("taskLists").document(listId).updateData([
-            "isArchived": true
-        ]) { error in
-            if let error = error {
-                print("Error archiving task list: \(error.localizedDescription)")
-            } else {
-                self.loadActiveLists()
-            }
+    private func addNewTask() {
+        if !taskListId.isEmpty && !newTaskTitle.isEmpty {
+            taskListViewModel.addTask(to: taskListId, taskTitle: newTaskTitle)
+            newTaskTitle = ""
         }
     }
-    
-    // Delete a full task list
-    func deleteTaskList(listId: String) {
-        db.collection("taskLists").document(listId).delete { error in
-            if let error = error {
-                print("Error deleting task list: \(error.localizedDescription)")
-            } else {
-                self.loadActiveLists()
+}
+
+// MARK: - AddTaskView
+
+struct AddTaskView: View {
+    var taskListId: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var taskTitle = ""
+    @EnvironmentObject private var taskListViewModel: TaskListViewModel
+
+    var body: some View {
+        NavigationView {
+            Form {
+                TextField("Task title", text: $taskTitle)
+                
+                Button("Add Task") {
+                    if !taskTitle.isEmpty {
+                        taskListViewModel.addTask(to: taskListId, taskTitle: taskTitle)
+                        dismiss()
+                    }
+                }
+                .disabled(taskTitle.isEmpty)
             }
+            .navigationTitle("Add New Task")
+            .navigationBarItems(trailing: Button("Cancel") {
+                dismiss()
+            })
         }
-    }
-    
-    // 🆕 Delete a specific task inside a list
-    func deleteTask(taskListId: String, taskId: String) {
-        guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
-        guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
-        
-        activeLists[listIndex].tasks.remove(at: taskIndex)
-        
-        let updatedTasks = activeLists[listIndex].tasks.map { [
-            "id": $0.id,
-            "title": $0.title,
-            "isCompleted": $0.isCompleted,
-            "createdAt": Timestamp(date: $0.createdAt)
-        ]}
-        
-        db.collection("taskLists").document(taskListId).updateData([
-            "tasks": updatedTasks
-        ]) { error in
-            if let error = error {
-                print("Error deleting task: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    // Helper - manually parse Firestore document into TaskList
-    private func parseTaskList(document: QueryDocumentSnapshot) -> TaskList {
-        let data = document.data()
-        
-        let id = data["id"] as? String ?? document.documentID
-        let title = data["title"] as? String ?? ""
-        let isArchived = data["isArchived"] as? Bool ?? false
-        let createdAtTimestamp = data["createdAt"] as? Timestamp ?? Timestamp()
-        let createdAt = createdAtTimestamp.dateValue()
-        let userId = data["userId"] as? String ?? ""
-        
-        var tasks: [Task] = []
-        if let taskDataArray = data["tasks"] as? [[String: Any]] {
-            tasks = taskDataArray.map { taskData in
-                Task(
-                    id: taskData["id"] as? String ?? UUID().uuidString,
-                    title: taskData["title"] as? String ?? "",
-                    isCompleted: taskData["isCompleted"] as? Bool ?? false,
-                    createdAt: (taskData["createdAt"] as? Timestamp)?.dateValue() ?? Date()
-                )
-            }
-        }
-        
-        return TaskList(
-            id: id,
-            title: title,
-            tasks: tasks,
-            createdAt: createdAt,
-            isArchived: isArchived,
-            userId: userId
-        )
     }
 }

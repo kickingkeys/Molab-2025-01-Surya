@@ -1,6 +1,14 @@
+//
+//  TaskListViewModel.swift
+//  Thoughtsort_UI
+//
+//  Created by Surya Narreddi on 28/04/25.
+//
+
 import Foundation
 import FirebaseFirestore
 
+@MainActor
 class TaskListViewModel: ObservableObject {
     @Published var activeLists: [TaskList] = []
     @Published var archivedLists: [TaskList] = []
@@ -24,9 +32,7 @@ class TaskListViewModel: ObservableObject {
                 }
                 guard let documents = snapshot?.documents else { return }
                 
-                self.activeLists = documents.map { doc -> TaskList in
-                    self.parseTaskList(document: doc)
-                }
+                self.activeLists = documents.map { self.parseTaskList(document: $0) }
             }
     }
     
@@ -42,9 +48,7 @@ class TaskListViewModel: ObservableObject {
                 }
                 guard let documents = snapshot?.documents else { return }
                 
-                self.archivedLists = documents.map { doc -> TaskList in
-                    self.parseTaskList(document: doc)
-                }
+                self.archivedLists = documents.map { self.parseTaskList(document: $0) }
             }
     }
     
@@ -56,7 +60,7 @@ class TaskListViewModel: ObservableObject {
             "tasks": [],
             "createdAt": Timestamp(date: Date()),
             "isArchived": false,
-            "userId": ""
+            "userId": "" // Future: set userId here after auth
         ]
         
         db.collection("taskLists").addDocument(data: newList) { error in
@@ -66,7 +70,7 @@ class TaskListViewModel: ObservableObject {
         }
     }
     
-    // Add a task to an existing list
+    // Add a task to a list
     func addTask(to taskListId: String, taskTitle: String) {
         guard let index = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         
@@ -78,7 +82,7 @@ class TaskListViewModel: ObservableObject {
         
         activeLists[index].tasks.append(newTask)
         
-        let taskData = activeLists[index].tasks.map { [
+        let updatedTasks = activeLists[index].tasks.map { [
             "id": $0.id,
             "title": $0.title,
             "isCompleted": $0.isCompleted,
@@ -86,11 +90,11 @@ class TaskListViewModel: ObservableObject {
         ]}
         
         db.collection("taskLists").document(taskListId).updateData([
-            "tasks": taskData
+            "tasks": updatedTasks
         ])
     }
     
-    // Toggle task completion
+    // Toggle completion
     func toggleTaskCompletion(taskListId: String, taskId: String) {
         guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
@@ -122,7 +126,7 @@ class TaskListViewModel: ObservableObject {
         }
     }
     
-    // Delete a full task list
+    // Delete a task list
     func deleteTaskList(listId: String) {
         db.collection("taskLists").document(listId).delete { error in
             if let error = error {
@@ -133,7 +137,7 @@ class TaskListViewModel: ObservableObject {
         }
     }
     
-    // 🆕 Delete a specific task inside a list
+    // Delete a specific task
     func deleteTask(taskListId: String, taskId: String) {
         guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
@@ -156,7 +160,7 @@ class TaskListViewModel: ObservableObject {
         }
     }
     
-    // Helper - manually parse Firestore document into TaskList
+    // Helper to parse Firestore document
     private func parseTaskList(document: QueryDocumentSnapshot) -> TaskList {
         let data = document.data()
         
