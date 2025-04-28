@@ -3,8 +3,10 @@ import FirebaseAuth
 
 struct HomeView: View {
     @EnvironmentObject var userSessionManager: UserSessionManager
+    @EnvironmentObject var taskListViewModel: TaskListViewModel
     @State private var taskText = ""
     @State private var isShowingTaskList = false
+    @State private var isShowingArchive = false
     @State private var isShowingSettings = false
     @State private var taskLists: [TaskList] = []
     @State private var isLoadingTasks = true
@@ -26,15 +28,14 @@ struct HomeView: View {
                             HStack {
                                 Text(Date(), style: .date)
                                     .font(.system(size: 14))
-                                    .foregroundColor(ThemeColors.textDark)  // Apply color to the date part
+                                    .foregroundColor(ThemeColors.textDark)
                                 Text(".")
                                     .font(.system(size: 14))
-                                    .foregroundColor(ThemeColors.textDark)  // Apply color to the comma part
+                                    .foregroundColor(ThemeColors.textDark)
                                 Text(Date(), style: .time)
                                     .font(.system(size: 14))
-                                    .foregroundColor(ThemeColors.textDark)  // Apply color to the time part
+                                    .foregroundColor(ThemeColors.textDark)
                             }
-
                         }
 
                         Spacer()
@@ -64,29 +65,30 @@ struct HomeView: View {
                         .padding(.top, 10)
 
                     // Input area
-                                        ZStack(alignment: .topLeading) {
-                                            TextEditor(text: $taskText)
-                                                .scrollContentBackground(.hidden)
-                                                .padding(12)
-                                                .frame(height: 140)
-                                                .background(ThemeColors.inputBackground)
-                                                .cornerRadius(16)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 16)
-                                                        .stroke(Color.clear, lineWidth: 0)
-                                                )
-                                                .padding(.horizontal, 20)
-                                                .padding(.top, 20)
-                                                .font(.body)
-                                                .foregroundColor(.primary)
+                    ZStack(alignment: .topLeading) {
+                        TextEditor(text: $taskText)
+                            .scrollContentBackground(.hidden)
+                            .padding(12)
+                            .frame(height: 140)
+                            .background(ThemeColors.inputBackground)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.clear, lineWidth: 0)
+                            )
+                            .padding(.horizontal, 20)
+                            .padding(.top, 20)
+                            .font(.body)
+                            .foregroundColor(.primary)
 
-                                            if taskText.isEmpty {
-                                                Text("Feeling overwhelmed? Type everything you need to do here, and I'll help organise your thoughts...")
-                                                    .foregroundColor(Color(.systemGray))
-                                                    .font(.body)
-                                                    .padding(.leading, 32)
-                                                    .padding(.top, 32)
-                                            }
+                        if taskText.isEmpty {
+                            Text("Feeling overwhelmed? Type everything you need to do here, and I'll help organise your thoughts...")
+                                .foregroundColor(Color(.systemGray))
+                                .font(.body)
+                                .padding(.leading, 32)
+                                .padding(.top, 32)
+                                .allowsHitTesting(false)
+                        }
                     }
 
                     // Action buttons
@@ -112,7 +114,12 @@ struct HomeView: View {
                         }
 
                         Button(action: {
-                            isShowingTaskList = true
+                            if !taskText.isEmpty {
+                                // Create task list from input
+                                let title = "Tasks - \(Date().formatted(date: .abbreviated, time: .shortened))"
+                                taskListViewModel.createTaskList(title: title, taskText: taskText)
+                                isShowingTaskList = true
+                            }
                         }) {
                             HStack {
                                 Image(systemName: "wand.and.stars")
@@ -121,13 +128,19 @@ struct HomeView: View {
                                     .foregroundColor(.white)
                                     .font(.system(size: 16, weight: .medium))
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 15)
-                            .background(ThemeColors.accent)
-                            .cornerRadius(25)
+                            .padding(16)
+                            .frame(maxWidth: .infinity, minHeight: 51, maxHeight: 51, alignment: .center)
+                            .background(Color(red: 0.93, green: 0.41, blue: 0.17))
+                            .cornerRadius(100)
+                            .opacity(taskText.isEmpty ? 0.5 : 1)
                         }
+                        .disabled(taskText.isEmpty)
                         .navigationDestination(isPresented: $isShowingTaskList) {
-                            TaskListView()
+                            if let latestList = taskListViewModel.activeLists.first {
+                                TaskListView(taskListId: latestList.id)
+                            } else {
+                                TaskListView()
+                            }
                         }
                     }
                     .padding(.horizontal, 20)
@@ -197,20 +210,27 @@ struct HomeView: View {
                         .padding(.vertical, 12)
                         .background(ThemeColors.buttonLight)
 
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 5) {
-                                Image(systemName: "archivebox")
-                                    .foregroundColor(ThemeColors.textDark)
-                                Text("Archive")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(ThemeColors.textDark)
+                        Button(action: {
+                            isShowingArchive = true
+                        }) {
+                            HStack {
+                                Spacer()
+                                VStack(spacing: 5) {
+                                    Image(systemName: "archivebox")
+                                        .foregroundColor(ThemeColors.textDark)
+                                    Text("Archive")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(ThemeColors.textDark)
+                                }
+                                Spacer()
                             }
-                            Spacer()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(ThemeColors.inputBackground.opacity(0.5))
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(ThemeColors.inputBackground.opacity(0.5))
+                        .navigationDestination(isPresented: $isShowingArchive) {
+                            ArchiveView()
+                        }
                     }
                     .cornerRadius(10)
                     .padding(.horizontal, 20)
@@ -222,6 +242,7 @@ struct HomeView: View {
             }
             .onAppear {
                 fetchTaskLists()
+                taskListViewModel.loadActiveLists()
             }
         }
     }
@@ -239,12 +260,5 @@ struct HomeView: View {
                 isLoadingTasks = false
             }
         }
-    }
-}
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-            .environmentObject(UserSessionManager())
     }
 }

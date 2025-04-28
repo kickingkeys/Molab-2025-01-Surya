@@ -2,10 +2,10 @@ import SwiftUI
 
 struct TaskListView: View {
     var taskListId: String = ""
-    @EnvironmentObject private var taskListViewModel: TaskListViewModel
-    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var taskListViewModel = TaskListViewModel()
     @State private var newTaskTitle = ""
-    @State private var showingAddTask = false
+    @State private var isTaskInputFocused = false
+    @Environment(\.presentationMode) var presentationMode
     
     private var taskList: TaskList? {
         taskListViewModel.activeLists.first(where: { $0.id == taskListId })
@@ -20,7 +20,7 @@ struct TaskListView: View {
                 // Header with back button
                 HStack(alignment: .center) {
                     Button(action: {
-                        dismiss()
+                        presentationMode.wrappedValue.dismiss()
                     }) {
                         HStack {
                             Image(systemName: "chevron.left")
@@ -61,6 +61,33 @@ struct TaskListView: View {
                     .frame(height: 1)
                     .padding(.top, 10)
                 
+                // Inline task entry
+                HStack(spacing: 8) {
+                    ZStack {
+                        Rectangle()
+                            .fill(ThemeColors.buttonLight)
+                            .frame(width: 16, height: 16)
+                            .cornerRadius(4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(ThemeColors.accent, lineWidth: 0.5)
+                            )
+                        
+                        Image(systemName: "plus")
+                            .font(.system(size: 10))
+                            .foregroundColor(ThemeColors.accent)
+                    }
+                    
+                    TextField("Add a new task...", text: $newTaskTitle, onCommit: {
+                        addNewTask()
+                    })
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(ThemeColors.textDark)
+                    .padding(.vertical, 12)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 15)
+                
                 // Task list
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
@@ -99,33 +126,6 @@ struct TaskListView: View {
                                 .foregroundColor(ThemeColors.textLight)
                                 .padding()
                         }
-                        
-                        // Add task button
-                        Button(action: {
-                            showingAddTask = true
-                        }) {
-                            HStack(spacing: 8) {
-                                ZStack {
-                                    Rectangle()
-                                        .fill(ThemeColors.buttonLight)
-                                        .frame(width: 16, height: 16)
-                                        .cornerRadius(4)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .stroke(ThemeColors.accent, lineWidth: 0.5)
-                                        )
-                                    
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 10))
-                                        .foregroundColor(ThemeColors.accent)
-                                }
-                                
-                                Text("Add more items")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(ThemeColors.textDark)
-                            }
-                            .padding(.top, 5)
-                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
@@ -146,7 +146,7 @@ struct TaskListView: View {
                     Button(action: {
                         if let id = taskList?.id {
                             taskListViewModel.archiveTaskList(id)
-                            dismiss()
+                            presentationMode.wrappedValue.dismiss()
                         }
                     }) {
                         HStack(spacing: 8) {
@@ -174,35 +174,15 @@ struct TaskListView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $showingAddTask) {
-            AddTaskView(taskListId: taskListId)
+        .onAppear {
+            self.taskListViewModel.loadActiveLists()
         }
     }
-}
-
-// AddTaskView for adding new tasks
-struct AddTaskView: View {
-    var taskListId: String
-    @Environment(\.dismiss) private var dismiss
-    @State private var taskTitle = ""
-    @EnvironmentObject private var taskListViewModel: TaskListViewModel
     
-    var body: some View {
-        NavigationView {
-            Form {
-                TextField("Task title", text: $taskTitle)
-                
-                Button("Add Task") {
-                    // Add task logic would go here
-                    // This requires updating our FirestoreManager to support adding individual tasks
-                    dismiss()
-                }
-                .disabled(taskTitle.isEmpty)
-            }
-            .navigationTitle("Add New Task")
-            .navigationBarItems(trailing: Button("Cancel") {
-                dismiss()
-            })
+    private func addNewTask() {
+        if !taskListId.isEmpty && !newTaskTitle.isEmpty {
+            taskListViewModel.addTask(to: taskListId, taskTitle: newTaskTitle)
+            newTaskTitle = ""
         }
     }
 }
