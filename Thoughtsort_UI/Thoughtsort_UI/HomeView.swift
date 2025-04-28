@@ -1,21 +1,13 @@
-//
-//  HomeView.swift
-//  Thoughtsort_UI
-//
-
 import SwiftUI
+import FirebaseAuth
 
 struct HomeView: View {
+    @EnvironmentObject var userSessionManager: UserSessionManager
     @State private var taskText = ""
     @State private var isShowingTaskList = false
     @State private var isShowingSettings = false
-
-    private var currentDateFormatted: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .short
-        return formatter.string(from: Date())
-    }
+    @State private var taskLists: [TaskList] = []
+    @State private var isLoadingTasks = true
 
     var body: some View {
         NavigationStack {
@@ -23,16 +15,26 @@ struct HomeView: View {
                 ThemeColors.background
                     .ignoresSafeArea()
 
-                VStack(alignment: .center, spacing: 0) {
-                    HStack(alignment: .top, spacing: 8) {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Title and settings icon
+                    HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("Create your To-Do List")
                                 .font(.system(size: 28, weight: .medium))
                                 .foregroundColor(ThemeColors.textDark)
+                            
+                            HStack {
+                                Text(Date(), style: .date)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(ThemeColors.textDark)  // Apply color to the date part
+                                Text(".")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(ThemeColors.textDark)  // Apply color to the comma part
+                                Text(Date(), style: .time)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(ThemeColors.textDark)  // Apply color to the time part
+                            }
 
-                            Text(currentDateFormatted)
-                                .font(.system(size: 14))
-                                .foregroundColor(ThemeColors.textDark)
                         }
 
                         Spacer()
@@ -42,55 +44,56 @@ struct HomeView: View {
                         }) {
                             Image(systemName: "gearshape.fill")
                                 .resizable()
-                                .frame(width: 24, height: 24)
+                                .frame(width: 22, height: 22)
                                 .foregroundColor(ThemeColors.textDark)
-                                .padding(.top, 4) // Adjusted padding to align with text top
                         }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
 
-                    // Divider
+                    // Dotted line divider
                     Rectangle()
+                        .fill(Color.clear)
                         .frame(height: 1)
-                        .foregroundColor(.gray.opacity(0.4))
                         .overlay(
                             Rectangle()
                                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
-                                .foregroundColor(.gray.opacity(0.4))
+                                .foregroundColor(ThemeColors.textDark.opacity(0.3))
                         )
-                        .padding(.top, 10)
                         .padding(.horizontal, 20)
+                        .padding(.top, 10)
 
                     // Input area
-                    ZStack(alignment: .topLeading) {
-                        TextEditor(text: $taskText)
-                            .scrollContentBackground(.hidden)
-                            .padding(12)
-                            .frame(height: 140)
-                            .background(ThemeColors.inputBackground)
-                            .cornerRadius(16)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.clear, lineWidth: 0)
-                            )
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
-                            .font(.body)
-                            .foregroundColor(.primary)
+                                        ZStack(alignment: .topLeading) {
+                                            TextEditor(text: $taskText)
+                                                .scrollContentBackground(.hidden)
+                                                .padding(12)
+                                                .frame(height: 140)
+                                                .background(ThemeColors.inputBackground)
+                                                .cornerRadius(16)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 16)
+                                                        .stroke(Color.clear, lineWidth: 0)
+                                                )
+                                                .padding(.horizontal, 20)
+                                                .padding(.top, 20)
+                                                .font(.body)
+                                                .foregroundColor(.primary)
 
-                        if taskText.isEmpty {
-                            Text("Feeling overwhelmed? Type everything you need to do here, and I'll help organise your thoughts...")
-                                .foregroundColor(Color(.systemGray))
-                                .font(.body)
-                                .padding(.leading, 32)
-                                .padding(.top, 32)
-                        }
+                                            if taskText.isEmpty {
+                                                Text("Feeling overwhelmed? Type everything you need to do here, and I'll help organise your thoughts...")
+                                                    .foregroundColor(Color(.systemGray))
+                                                    .font(.body)
+                                                    .padding(.leading, 32)
+                                                    .padding(.top, 32)
+                                            }
                     }
 
                     // Action buttons
                     HStack(spacing: 12) {
-                        Button(action: {}) {
+                        Button(action: {
+                            // Placeholder for Record action
+                        }) {
                             HStack {
                                 Image(systemName: "mic.fill")
                                     .foregroundColor(ThemeColors.textDark)
@@ -130,48 +133,47 @@ struct HomeView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
 
-                    // Your Lists section
+                    // Task Lists Section
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Your Lists for Today")
                             .font(.system(size: 28, weight: .medium))
                             .foregroundColor(ThemeColors.textDark)
                             .padding(.top, 30)
 
-                        // List item
-                        Button(action: {
-                            isShowingTaskList = true
-                        }) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Grocery Day")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(ThemeColors.textDark)
+                        if isLoadingTasks {
+                            ProgressView()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        } else if taskLists.isEmpty {
+                            Text("No task lists found. Start by creating one!")
+                                .font(.system(size: 16))
+                                .foregroundColor(ThemeColors.textLight)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            ForEach(taskLists) { list in
+                                Button(action: {
+                                    isShowingTaskList = true
+                                }) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(list.title)
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(ThemeColors.textDark)
 
-                                HStack(spacing: 4) {
-                                    Text("6 Items")
+                                        HStack(spacing: 4) {
+                                            Text("\(list.tasks.count) Items")
+                                            Text("•")
+                                            Text("\(list.tasks.filter { $0.isCompleted }.count) Completed")
+                                            Text("•")
+                                            Text("Last edited \(list.createdAt, style: .time)")
+                                        }
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(Color(.systemGray))
-
-                                    Circle()
-                                        .fill(Color(.systemGray))
-                                        .frame(width: 4, height: 4)
-
-                                    Text("4 Completed")
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(Color(.systemGray))
-
-                                    Circle()
-                                        .fill(Color(.systemGray))
-                                        .frame(width: 4, height: 4)
-
-                                    Text("Last edited 12:35 PM")
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(Color(.systemGray))
+                                        .foregroundColor(Color(red: 0.46, green: 0.46, blue: 0.46))
+                                    }
+                                    .padding(12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(ThemeColors.inputBackground)
+                                    .cornerRadius(12)
                                 }
                             }
-                            .padding(12)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(ThemeColors.inputBackground)
-                            .cornerRadius(12)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -218,6 +220,24 @@ struct HomeView: View {
             .navigationDestination(isPresented: $isShowingSettings) {
                 SettingsView()
             }
+            .onAppear {
+                fetchTaskLists()
+            }
+        }
+    }
+
+    private func fetchTaskLists() {
+        isLoadingTasks = true
+        FirestoreManager().getTaskLists(archived: false) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let lists):
+                    self.taskLists = lists
+                case .failure(let error):
+                    print("Error fetching task lists: \(error.localizedDescription)")
+                }
+                isLoadingTasks = false
+            }
         }
     }
 }
@@ -225,5 +245,6 @@ struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
+            .environmentObject(UserSessionManager())
     }
 }
