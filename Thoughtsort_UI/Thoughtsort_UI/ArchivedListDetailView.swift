@@ -1,23 +1,13 @@
-//
-//  ArchivedListDetailView.swift
-//  Thoughtsort_UI
-//
-//  Created by Surya Narreddi on 21/04/25.
-//
-
 import SwiftUI
 
 struct ArchivedListDetailView: View {
-    let listTitle: String
-    let creationDate: String
-    @State private var tasks = [
-        Task(title: "Buy grocery from brooklyn bodega", isCompleted: false),
-        Task(title: "Get beard trimmed", isCompleted: true),
-        Task(title: "Crib about Figma's new UI", isCompleted: false),
-        Task(title: "Complete project for this semester", isCompleted: false),
-        Task(title: "Touch grass", isCompleted: false)
-    ]
+    var listId: String
+    @EnvironmentObject private var taskListViewModel: TaskListViewModel
     @Environment(\.dismiss) private var dismiss
+    
+    private var taskList: TaskList? {
+        taskListViewModel.archivedLists.first(where: { $0.id == listId })
+    }
     
     var body: some View {
         ZStack {
@@ -43,17 +33,29 @@ struct ArchivedListDetailView: View {
                 .padding(.leading, 20)
                 
                 // Title and timestamp
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(listTitle)
-                        .font(.system(size: 28, weight: .medium))
-                        .foregroundColor(ThemeColors.textDark)
-                    
-                    Text("Created on \(creationDate)")
-                        .font(.system(size: 14))
-                        .foregroundColor(ThemeColors.textDark)
+                if let list = taskList {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(list.title)
+                            .font(.system(size: 28, weight: .medium))
+                            .foregroundColor(ThemeColors.textDark)
+                        
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "MMMM d, yyyy"
+                        Text("Created on \(dateFormatter.string(from: list.createdAt))")
+                            .font(.system(size: 14))
+                            .foregroundColor(ThemeColors.textDark)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 15)
+                } else {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("List Details")
+                            .font(.system(size: 28, weight: .medium))
+                            .foregroundColor(ThemeColors.textDark)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 15)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 15)
                 
                 // Divider
                 Rectangle()
@@ -64,31 +66,37 @@ struct ArchivedListDetailView: View {
                 // Task list
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        ForEach(tasks.indices, id: \.self) { index in
-                            HStack(spacing: 8) {
-                                // Task checkbox (non-interactive in archive view)
-                                if tasks[index].isCompleted {
-                                    ZStack {
+                        if let list = taskList {
+                            ForEach(list.tasks) { task in
+                                HStack(spacing: 8) {
+                                    // Non-interactive checkbox
+                                    if task.isCompleted {
+                                        ZStack {
+                                            Circle()
+                                                .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
+                                                .frame(width: 16, height: 16)
+                                            
+                                            Circle()
+                                                .fill(ThemeColors.accent)
+                                                .frame(width: 10, height: 10)
+                                        }
+                                    } else {
                                         Circle()
                                             .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
                                             .frame(width: 16, height: 16)
-                                        
-                                        Circle()
-                                            .fill(ThemeColors.accent)
-                                            .frame(width: 10, height: 10)
                                     }
-                                } else {
-                                    Circle()
-                                        .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
-                                        .frame(width: 16, height: 16)
+                                    
+                                    // Task title
+                                    Text(task.title)
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(ThemeColors.textDark)
+                                        .strikethrough(task.isCompleted)
                                 }
-                                
-                                // Task title
-                                Text(tasks[index].title)
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(ThemeColors.textDark)
-                                    .strikethrough(tasks[index].isCompleted)
                             }
+                        } else {
+                            Text("Loading tasks...")
+                                .foregroundColor(ThemeColors.textLight)
+                                .padding()
                         }
                     }
                     .padding(.horizontal, 20)
@@ -102,8 +110,4 @@ struct ArchivedListDetailView: View {
     }
 }
 
-struct ArchivedListDetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        ArchivedListDetailView(listTitle: "Grocery Day", creationDate: "April 14, 2025")
-    }
-}
+// Remove any other ArchivedListDetailView definitions in your project
