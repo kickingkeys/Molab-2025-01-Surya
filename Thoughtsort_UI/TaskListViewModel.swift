@@ -1,194 +1,191 @@
 import Foundation
-import Combine
+import FirebaseFirestore
 
 class TaskListViewModel: ObservableObject {
     @Published var activeLists: [TaskList] = []
     @Published var archivedLists: [TaskList] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
     
-    private let firestoreManager = FirestoreManager()
-    private var cancellables = Set<AnyCancellable>()
+    private var db = Firestore.firestore()
+
+    init() {
+        loadActiveLists()
+        listenToArchivedLists()
+    }
     
+    // Load Active Lists
     func loadActiveLists() {
-        isLoading = true
+        db.collection("taskLists")
+            .whereField("isArchived", isEqualTo: false)
+            .order(by: "createdAt", descending: true)
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    print("Error loading active lists: \(error.localizedDescription)")
+                    return
+                }
+                guard let documents = snapshot?.documents else { return }
+                
+                self.activeLists = documents.map { doc -> TaskList in
+                    self.parseTaskList(document: doc)
+                }
+            }
+    }
+    
+    // Load Archived Lists
+    func listenToArchivedLists() {
+        db.collection("taskLists")
+            .whereField("isArchived", isEqualTo: true)
+            .order(by: "createdAt", descending: true)
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    print("Error loading archived lists: \(error.localizedDescription)")
+                    return
+                }
+                guard let documents = snapshot?.documents else { return }
+                
+                self.archivedLists = documents.map { doc -> TaskList in
+                    self.parseTaskList(document: doc)
+                }
+            }
+    }
+    
+    // Create a new Task List
+    func createTaskList(title: String) {
+        let newList: [String: Any] = [
+            "id": UUID().uuidString,
+            "title": title,
+            "tasks": [],
+            "createdAt": Timestamp(date: Date()),
+            "isArchived": false,
+            "userId": ""
+        ]
         
-        firestoreManager.getTaskLists(archived: false) { [weak self] result in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            switch result {
-            case .success(let lists):
-                DispatchQueue.main.async {
-                    self.activeLists = lists
-                    self.errorMessage = nil
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
+        db.collection("taskLists").addDocument(data: newList) { error in
+            if let error = error {
+                print("Error creating task list: \(error.localizedDescription)")
             }
         }
     }
     
-    func loadArchivedLists() {
-        isLoading = true
-        
-        firestoreManager.getTaskLists(archived: true) { [weak self] result in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            switch result {
-            case .success(let lists):
-                DispatchQueue.main.async {
-                    self.archivedLists = lists
-                    self.errorMessage = nil
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-    
-    func createTaskList(title: String, taskText: String) {
-        isLoading = true
-        
-        // Parse tasks from text (simple line-by-line parsing)
-        let taskLines = taskText.split(separator: "\n")
-        let tasks = taskLines.map { taskLine in
-            Task(
-                title: String(taskLine.trimmingCharacters(in: .whitespacesAndNewlines)),
-                isCompleted: false,
-                createdAt: Date()
-            )
-        }
-        
-        firestoreManager.createTaskList(title: title, tasks: tasks) { [weak self] result in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            switch result {
-            case .success(_):
-                self.loadActiveLists()
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-    
-    func toggleTaskCompletion(taskListId: String, taskId: String) {
-        firestoreManager.toggleTaskCompletion(taskListId: taskListId, taskId: taskId) { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(_):
-                // Update local state
-                if let listIndex = self.activeLists.firstIndex(where: { $0.id == taskListId }),
-                   let taskIndex = self.activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) {
-                    DispatchQueue.main.async {
-                        self.activeLists[listIndex].tasks[taskIndex].isCompleted.toggle()
-                    }
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-    
-    func archiveTaskList(_ taskListId: String) {
-        isLoading = true
-        
-        firestoreManager.archiveTaskList(taskListId) { [weak self] result in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            switch result {
-            case .success(_):
-                // Update both lists
-                self.loadActiveLists()
-                self.loadArchivedLists()
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
-            }
-        }
-    }
-    
-    // MARK: - New Task Management Methods
-    
+    // Add a task to an existing list
     func addTask(to taskListId: String, taskTitle: String) {
-        isLoading = true
+        guard let index = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         
-        firestoreManager.addTask(to: taskListId, taskTitle: taskTitle) { [weak self] result in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            switch result {
-            case .success(let task):
-                // Update active lists locally if the task list is currently loaded
-                if let index = self.activeLists.firstIndex(where: { $0.id == taskListId }) {
-                    DispatchQueue.main.async {
-                        self.activeLists[index].tasks.append(task)
-                    }
-                } else {
-                    // Reload the lists if we can't find it locally
-                    self.loadActiveLists()
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
+        let newTask = Task(
+            title: taskTitle,
+            isCompleted: false,
+            createdAt: Date()
+        )
+        
+        activeLists[index].tasks.append(newTask)
+        
+        let taskData = activeLists[index].tasks.map { [
+            "id": $0.id,
+            "title": $0.title,
+            "isCompleted": $0.isCompleted,
+            "createdAt": Timestamp(date: $0.createdAt)
+        ]}
+        
+        db.collection("taskLists").document(taskListId).updateData([
+            "tasks": taskData
+        ])
+    }
+    
+    // Toggle task completion
+    func toggleTaskCompletion(taskListId: String, taskId: String) {
+        guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
+        guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
+        
+        activeLists[listIndex].tasks[taskIndex].isCompleted.toggle()
+        
+        let updatedTasks = activeLists[listIndex].tasks.map { [
+            "id": $0.id,
+            "title": $0.title,
+            "isCompleted": $0.isCompleted,
+            "createdAt": Timestamp(date: $0.createdAt)
+        ]}
+        
+        db.collection("taskLists").document(taskListId).updateData([
+            "tasks": updatedTasks
+        ])
+    }
+    
+    // Archive a task list
+    func archiveTaskList(_ listId: String) {
+        db.collection("taskLists").document(listId).updateData([
+            "isArchived": true
+        ]) { error in
+            if let error = error {
+                print("Error archiving task list: \(error.localizedDescription)")
+            } else {
+                self.loadActiveLists()
             }
         }
     }
     
-    func deleteTask(from taskListId: String, taskId: String) {
-        firestoreManager.deleteTask(from: taskListId, taskId: taskId) { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success():
-                // Update active lists locally
-                if let listIndex = self.activeLists.firstIndex(where: { $0.id == taskListId }) {
-                    DispatchQueue.main.async {
-                        self.activeLists[listIndex].tasks.removeAll(where: { $0.id == taskId })
-                    }
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
+    // Delete a full task list
+    func deleteTaskList(listId: String) {
+        db.collection("taskLists").document(listId).delete { error in
+            if let error = error {
+                print("Error deleting task list: \(error.localizedDescription)")
+            } else {
+                self.loadActiveLists()
             }
         }
     }
     
-    func reorderTasks(taskListId: String, tasks: [Task]) {
-        isLoading = true
+    // 🆕 Delete a specific task inside a list
+    func deleteTask(taskListId: String, taskId: String) {
+        guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
+        guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
         
-        firestoreManager.reorderTasks(taskListId: taskListId, tasks: tasks) { [weak self] result in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            switch result {
-            case .success():
-                // Update active lists locally
-                if let listIndex = self.activeLists.firstIndex(where: { $0.id == taskListId }) {
-                    DispatchQueue.main.async {
-                        self.activeLists[listIndex].tasks = tasks
-                    }
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
-                }
+        activeLists[listIndex].tasks.remove(at: taskIndex)
+        
+        let updatedTasks = activeLists[listIndex].tasks.map { [
+            "id": $0.id,
+            "title": $0.title,
+            "isCompleted": $0.isCompleted,
+            "createdAt": Timestamp(date: $0.createdAt)
+        ]}
+        
+        db.collection("taskLists").document(taskListId).updateData([
+            "tasks": updatedTasks
+        ]) { error in
+            if let error = error {
+                print("Error deleting task: \(error.localizedDescription)")
             }
         }
+    }
+    
+    // Helper - manually parse Firestore document into TaskList
+    private func parseTaskList(document: QueryDocumentSnapshot) -> TaskList {
+        let data = document.data()
+        
+        let id = data["id"] as? String ?? document.documentID
+        let title = data["title"] as? String ?? ""
+        let isArchived = data["isArchived"] as? Bool ?? false
+        let createdAtTimestamp = data["createdAt"] as? Timestamp ?? Timestamp()
+        let createdAt = createdAtTimestamp.dateValue()
+        let userId = data["userId"] as? String ?? ""
+        
+        var tasks: [Task] = []
+        if let taskDataArray = data["tasks"] as? [[String: Any]] {
+            tasks = taskDataArray.map { taskData in
+                Task(
+                    id: taskData["id"] as? String ?? UUID().uuidString,
+                    title: taskData["title"] as? String ?? "",
+                    isCompleted: taskData["isCompleted"] as? Bool ?? false,
+                    createdAt: (taskData["createdAt"] as? Timestamp)?.dateValue() ?? Date()
+                )
+            }
+        }
+        
+        return TaskList(
+            id: id,
+            title: title,
+            tasks: tasks,
+            createdAt: createdAt,
+            isArchived: isArchived,
+            userId: userId
+        )
     }
 }

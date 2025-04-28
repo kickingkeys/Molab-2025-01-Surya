@@ -11,10 +11,9 @@ import FirebaseFirestore
 struct Task: Identifiable, Codable {
     var id: String = UUID().uuidString
     var title: String
-    var isCompleted: Bool
-    var createdAt: Date
-    
-    // For Firestore encoding/decoding
+    var isCompleted: Bool = false
+    var createdAt: Date = Date()
+
     enum CodingKeys: String, CodingKey {
         case id
         case title

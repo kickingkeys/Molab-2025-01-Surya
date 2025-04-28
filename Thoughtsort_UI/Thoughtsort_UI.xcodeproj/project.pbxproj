@@ -137,13 +137,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D6135F8C2DBEAC32008DF3D9 /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModels;
-			sourceTree = "<group>";
-		};
 		D6135F8D2DBEAC41008DF3D9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -161,18 +154,25 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
+		D642EB422DBFF39600485EA0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D6FFCD132DB705FB00124233 = {
 			isa = PBXGroup;
 			children = (
 				D6135F8E2DBEAC88008DF3D9 /* Services */,
 				D6135F8D2DBEAC41008DF3D9 /* Models */,
-				D6135F8C2DBEAC32008DF3D9 /* ViewModels */,
 				D6FFCD1E2DB705FB00124233 /* Thoughtsort_UI */,
 				D6FFCD2C2DB705FD00124233 /* Thoughtsort_UITests */,
 				D6FFCD362DB705FD00124233 /* Thoughtsort_UIUITests */,
 				D6FFCD1D2DB705FB00124233 /* Products */,
 				D6135F912DBEACD0008DF3D9 /* TaskListViewModel.swift */,
 				D6135F932DBF0EE7008DF3D9 /* GoogleService-Info.plist */,
+				D642EB422DBFF39600485EA0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
