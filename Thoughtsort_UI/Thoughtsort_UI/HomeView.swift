@@ -1,7 +1,6 @@
 //  HomeView.swift
 //  Thoughtsort_UI
-//
-//  Updated on 2025-05-02 18:40 EDT
+//  Updated on 2025-05-02 18:55 EDT
 
 import SwiftUI
 import FirebaseAuth
@@ -23,8 +22,7 @@ struct HomeView: View {
     @State private var showShortInputAlert = false
     @State private var showClaudeErrorAlert = false
     @State private var navigateToListID: String?
-
-    @AppStorage("lastAutoArchiveDate") private var lastAutoArchiveDate: String = ""
+    @FocusState private var isInputFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -42,7 +40,7 @@ struct HomeView: View {
             .onAppear {
                 taskListViewModel.loadActiveLists()
                 requestSpeechAuthorization()
-                performAutoArchiveIfNeeded()
+                taskListViewModel.archiveOldLists()
             }
             .navigationDestination(for: String.self) { listId in
                 TaskListView(taskListId: listId)
@@ -66,17 +64,6 @@ struct HomeView: View {
                     showClaudeErrorAlert = true
                 }
             }
-        }
-    }
-
-    private func performAutoArchiveIfNeeded() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let todayString = formatter.string(from: Date())
-
-        if lastAutoArchiveDate != todayString {
-            taskListViewModel.archiveOldLists()
-            lastAutoArchiveDate = todayString
         }
     }
 
@@ -125,6 +112,7 @@ struct HomeView: View {
     private var inputArea: some View {
         ZStack(alignment: .topLeading) {
             TextEditor(text: $taskText)
+                .focused($isInputFocused)
                 .scrollContentBackground(.hidden)
                 .padding(12)
                 .frame(height: 140)
@@ -135,7 +123,7 @@ struct HomeView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
 
-            if taskText.isEmpty {
+            if taskText.isEmpty && !isInputFocused && !isRecording {
                 Text("Feeling overwhelmed? Type everything you need to do here, and I'll help organise your thoughts...")
                     .foregroundColor(Color(.systemGray))
                     .font(.body)
@@ -150,7 +138,12 @@ struct HomeView: View {
         HStack(spacing: 12) {
             Button(action: {
                 isRecording.toggle()
-                isRecording ? startRecording() : stopRecording()
+                if isRecording {
+                    taskText = ""
+                    startRecording()
+                } else {
+                    stopRecording()
+                }
             }) {
                 HStack {
                     Image(systemName: isRecording ? "stop.circle.fill" : "mic.fill")
