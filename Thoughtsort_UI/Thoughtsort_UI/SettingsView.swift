@@ -2,8 +2,10 @@ import SwiftUI
 import FirebaseAuth
 
 struct SettingsView: View {
-    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var userSessionManager: UserSessionManager
+
+    @State private var claudeKey: String = KeychainManager.getAPIKey() ?? ""
+    @State private var isKeyVisible: Bool = false
 
     var body: some View {
         ZStack {
@@ -11,62 +13,97 @@ struct SettingsView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 20) {
-                // Title
-                Text("Settings")
-                    .font(.system(size: 32, weight: .medium))
-                    .foregroundColor(ThemeColors.textDark)
+                header
+
+                Text("Signed in as")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
 
-                // Signed-in user email
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Signed in as")
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(.systemGray))
-
-                    Text(userSessionManager.userEmail)
+                if let user = Auth.auth().currentUser {
+                    Text(user.email ?? "No email found")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(ThemeColors.textDark)
+                        .padding(.horizontal, 20)
                 }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(ThemeColors.inputBackground)
-                .cornerRadius(12)
-                .padding(.horizontal, 20)
+
+                claudeAPIKeyInput
 
                 Spacer()
 
-                // Sign Out button
-                Button(action: {
-                    do {
-                        try Auth.auth().signOut()
-                        userSessionManager.isLoggedIn = false
-                        userSessionManager.userEmail = ""
-                        dismiss()
-                    } catch {
-                        print("Error signing out: \(error.localizedDescription)")
+                logoutButton
+            }
+            .padding(.top, 40)
+        }
+    }
+
+    private var header: some View {
+        HStack {
+            Text("Settings")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(ThemeColors.textDark)
+
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private var claudeAPIKeyInput: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Claude API Key")
+                .font(.system(size: 14))
+                .foregroundColor(Color(.systemGray))
+
+            HStack {
+                Group {
+                    if isKeyVisible {
+                        TextField("Enter Claude API Key", text: $claudeKey)
+                            .textInputAutocapitalization(.never)
+                            .disableAutocorrection(true)
+                    } else {
+                        SecureField("Enter Claude API Key", text: $claudeKey)
+                            .textInputAutocapitalization(.never)
+                            .disableAutocorrection(true)
                     }
-                }) {
-                    Text("Sign Out")
-                        .foregroundColor(.white)
-                        .font(.system(size: 18, weight: .medium))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(ThemeColors.accent)
-                        .cornerRadius(30)
-                        .padding(.horizontal, 20)
                 }
-                .padding(.bottom, 30)
+                .padding()
+                .background(ThemeColors.inputBackground)
+                .cornerRadius(12)
+                .foregroundColor(ThemeColors.textDark)
+
+                Button(action: {
+                    isKeyVisible.toggle()
+                }) {
+                    Image(systemName: isKeyVisible ? "eye.slash.fill" : "eye.fill")
+                        .foregroundColor(ThemeColors.textDark)
+                        .padding(.trailing, 4)
+                }
+            }
+            .onChange(of: claudeKey) { newValue in
+                print("🔐 Saving Claude API key with length: \(newValue.count)")
+                KeychainManager.saveAPIKey(newValue)
             }
         }
-        .navigationBarBackButtonHidden(false)
-        .tint(ThemeColors.textDark)
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
     }
-}
 
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView()
-            .environmentObject(UserSessionManager())
+    private var logoutButton: some View {
+        Button(action: {
+            userSessionManager.signOut()
+        }) {
+            HStack {
+                Spacer()
+                Text("Sign Out")
+                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .medium))
+                Spacer()
+            }
+            .padding()
+            .background(Color.red)
+            .cornerRadius(12)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 30)
     }
 }

@@ -1,8 +1,3 @@
-//  HomeView.swift
-//  Thoughtsort_UI
-//
-//  Created by Surya Narreddi on 28/04/25.
-
 import SwiftUI
 import FirebaseAuth
 import Speech
@@ -15,11 +10,14 @@ struct HomeView: View {
     @State private var taskText = ""
     @State private var showSettings = false
     @State private var isRecording = false
-
     @State private var audioEngine = AVAudioEngine()
     @State private var speechRecognizer = SFSpeechRecognizer()
     @State private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     @State private var recognitionTask: SFSpeechRecognitionTask?
+
+    @State private var showShortInputAlert = false
+    @State private var showClaudeErrorAlert = false
+    @State private var navigateToListID: String?
 
     var body: some View {
         NavigationStack {
@@ -39,8 +37,27 @@ struct HomeView: View {
                 taskListViewModel.loadActiveLists()
                 requestSpeechAuthorization()
             }
+            .navigationDestination(for: String.self) { listId in
+                TaskListView(taskListId: listId)
+                    .environmentObject(taskListViewModel)
+            }
             .navigationDestination(isPresented: $showSettings) {
-                SettingsView() // <-- Replace with your SettingsView if needed
+                SettingsView()
+            }
+            .alert("Stop wasting tokens!", isPresented: $showShortInputAlert) {
+                Button("I'll do better", role: .cancel) { }
+            } message: {
+                Text("Just type that.")
+            }
+            .alert("Claude Error", isPresented: $showClaudeErrorAlert, actions: {
+                Button("I'll try again", role: .cancel) { }
+            }, message: {
+                Text(taskListViewModel.claudeErrorMessage ?? "Something went wrong.")
+            })
+            .onChange(of: taskListViewModel.claudeErrorMessage) { newValue in
+                if newValue != nil {
+                    showClaudeErrorAlert = true
+                }
             }
         }
     }
@@ -54,7 +71,7 @@ struct HomeView: View {
 
                 HStack(spacing: 4) {
                     Text(Date(), style: .date)
-                    Text("\u{2022}")  // <-- CORRECT
+                    Text("•")
                     Text(Date(), style: .time)
                 }
                 .font(.system(size: 14))
@@ -139,13 +156,16 @@ struct HomeView: View {
             }
 
             Button(action: {
-                if !taskText.isEmpty {
+                let trimmed = taskText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmed.count < 30 {
+                    showShortInputAlert = true
+                } else {
                     let title = formattedNewTaskListTitle()
-                    taskListViewModel.createTaskList(title: title)
+                    let newList = TaskList(title: title, userId: Auth.auth().currentUser?.uid ?? "unknown_user")
+                    navigateToListID = newList.id
+                    print("🟠 Navigating to new list ID: \(newList.id)")
+                    taskListViewModel.generateTaskListFromInput(input: trimmed, title: title, idOverride: newList.id)
                     taskText = ""
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        taskListViewModel.loadActiveLists()
-                    }
                 }
             }) {
                 HStack {
@@ -157,14 +177,32 @@ struct HomeView: View {
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, minHeight: 51, maxHeight: 51)
-                .background(Color(red: 0.93, green: 0.41, blue: 0.17))
+                .background(ThemeColors.accent)
                 .cornerRadius(100)
                 .opacity(taskText.isEmpty ? 0.5 : 1)
             }
             .disabled(taskText.isEmpty)
+            .navigationDestination(for: String.self) { id in
+                TaskListView(taskListId: id)
+                    .environmentObject(taskListViewModel)
+            }
+            .onChange(of: navigateToListID) { id in
+                if let id = id {
+                    print("✅ Trigger navigation to \(id)")
+                }
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 15)
+        .background(
+            NavigationLink("", tag: navigateToListID ?? "", selection: $navigateToListID) {
+                if let id = navigateToListID {
+                    TaskListView(taskListId: id)
+                        .environmentObject(taskListViewModel)
+                }
+            }
+            .opacity(0)
+        )
     }
 
     private var listsSection: some View {
@@ -186,35 +224,34 @@ struct HomeView: View {
                     ForEach(taskListViewModel.activeLists.sorted { $0.createdAt > $1.createdAt }) { list in
                         NavigationLink(destination: TaskListView(taskListId: list.id)
                             .environmentObject(taskListViewModel)) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(formattedTaskListTitle(list: list))
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(ThemeColors.textDark)
-
-                                HStack(spacing: 4) {
-                                    Text("\(list.tasks.count) Items")
-                                    Text("\u{2022}")
-                                    Text("\(list.tasks.filter { $0.isCompleted }.count) Completed")
-                                    Text("\u{2022}")
-                                    Text("Last edited \(list.createdAt, style: .time)")
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(formattedTaskListTitle(list: list))
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(ThemeColors.textDark)
+                                    HStack(spacing: 4) {
+                                        Text("\(list.tasks.count) Items")
+                                        Text("•")
+                                        Text("\(list.tasks.filter { $0.isCompleted }.count) Completed")
+                                        Text("•")
+                                        Text("Last edited \(list.createdAt, style: .time)")
+                                    }
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(ThemeColors.textLight)
                                 }
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(ThemeColors.textLight)
+                                .padding(8)
                             }
-                            .padding(8)
-                        }
-                        .listRowBackground(ThemeColors.background)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button {
-                                taskListViewModel.archiveTaskList(list.id)
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    taskListViewModel.loadActiveLists()
+                            .listRowBackground(ThemeColors.background)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button {
+                                    taskListViewModel.archiveTaskList(list.id)
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        taskListViewModel.loadActiveLists()
+                                    }
+                                } label: {
+                                    Label("Archive", systemImage: "archivebox")
                                 }
-                            } label: {
-                                Label("Archive", systemImage: "archivebox")
+                                .tint(.orange)
                             }
-                            .tint(.orange)
-                        }
                     }
                 }
                 .listStyle(PlainListStyle())
@@ -224,7 +261,6 @@ struct HomeView: View {
         }
     }
 
-    // Helpers
     private func formattedNewTaskListTitle() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM d, yyyy"
@@ -237,7 +273,6 @@ struct HomeView: View {
         return "Tasks • \(formatter.string(from: list.createdAt))"
     }
 
-    // Speech Recognition
     private func requestSpeechAuthorization() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
             if authStatus != .authorized {
@@ -273,9 +308,7 @@ struct HomeView: View {
     func stopRecording() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
-
-        recognitionRequest?.endAudio()  // <-- add "?"
-
+        recognitionRequest?.endAudio()
         recognitionTask?.finish()
         recognitionTask = nil
     }

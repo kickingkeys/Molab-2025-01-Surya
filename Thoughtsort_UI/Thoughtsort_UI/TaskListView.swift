@@ -13,6 +13,7 @@ struct TaskListView: View {
     
     @State private var newTaskTitle = ""
     @FocusState private var isTextFieldFocused: Bool
+    @State private var isGenerating = false
 
     private var taskList: TaskList? {
         taskListViewModel.activeLists.first(where: { $0.id == taskListId })
@@ -93,10 +94,21 @@ struct TaskListView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if let taskList = taskList {
                             if taskList.tasks.isEmpty {
-                                Text("No tasks yet. Start by adding one!")
-                                    .foregroundColor(ThemeColors.textLight)
+                                if isGenerating {
+                                    VStack(spacing: 12) {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.textLight))
+                                        Text("Generating tasks…")
+                                            .foregroundColor(ThemeColors.textLight)
+                                    }
                                     .padding(.top, 50)
                                     .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    Text("No tasks yet. Start by adding one!")
+                                        .foregroundColor(ThemeColors.textLight)
+                                        .padding(.top, 50)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
                             } else {
                                 ForEach(taskList.tasks) { task in
                                     HStack(spacing: 8) {
@@ -190,16 +202,21 @@ struct TaskListView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .tabBar) // ✅ Hide Tab Bar here
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             taskListViewModel.loadActiveLists()
+
+            // Detect Claude-generated empty list
+            if let list = taskListViewModel.activeLists.first(where: { $0.id == taskListId }) {
+                isGenerating = list.tasks.isEmpty
+            }
         }
     }
     
     private func addNewTask() {
         if !taskListId.isEmpty && !newTaskTitle.isEmpty {
             taskListViewModel.addTask(to: taskListId, taskTitle: newTaskTitle)
-            newTaskTitle = "" // ✅ Clear after adding
+            newTaskTitle = ""
             isTextFieldFocused = false
         }
     }

@@ -19,7 +19,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            debugPrintFonts()
+            // debugPrintFonts() // 🛑 Commented out to reduce console log noise
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 withAnimation {
                     isShowingSplash = false

@@ -1,8 +1,3 @@
-//
-//  TaskListViewModel.swift
-//  Thoughtsort_UI
-//
-
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
@@ -11,15 +6,16 @@ import FirebaseAuth
 class TaskListViewModel: ObservableObject {
     @Published var activeLists: [TaskList] = []
     @Published var archivedLists: [TaskList] = []
-    
+    @Published var claudeErrorMessage: String? = nil // ✅ Added
+
     private var db = Firestore.firestore()
 
     init() {
         loadActiveLists()
         listenToArchivedLists()
     }
-    
-    // Load Active Lists
+
+    // ✅ Load Active Lists
     func loadActiveLists() {
         db.collection("taskLists")
             .whereField("isArchived", isEqualTo: false)
@@ -30,12 +26,12 @@ class TaskListViewModel: ObservableObject {
                     return
                 }
                 guard let documents = snapshot?.documents else { return }
-                
+
                 self.activeLists = documents.map { self.parseTaskList(document: $0) }
             }
     }
-    
-    // Load Archived Lists
+
+    // ✅ Load Archived Lists
     func listenToArchivedLists() {
         db.collection("taskLists")
             .whereField("isArchived", isEqualTo: true)
@@ -46,72 +42,110 @@ class TaskListViewModel: ObservableObject {
                     return
                 }
                 guard let documents = snapshot?.documents else { return }
-                
+
                 self.archivedLists = documents.map { self.parseTaskList(document: $0) }
             }
     }
-    
-    // Create a new Task List (⚡ fixed)
-    func createTaskList(title: String) {
+
+    // ✅ Create a task list via Claude
+    func generateTaskListFromInput(input: String, title: String, idOverride: String? = nil) {
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
-        var newTaskList = TaskList(title: title, userId: userId)
-        
+        let newListId = idOverride ?? UUID().uuidString
+        var newTaskList = TaskList(id: newListId, title: title, userId: userId)
+
+        let docRef = db.collection("taskLists").document(newTaskList.id)
         do {
-            let taskListRef = db.collection("taskLists").document(newTaskList.id)
-            try taskListRef.setData(from: newTaskList)
-            print("✅ Successfully created task list with ID: \(newTaskList.id)")
+            try docRef.setData(from: newTaskList)
         } catch {
-            print("Error creating task list: \(error.localizedDescription)")
+            print("🔥 Failed to create new list: \(error.localizedDescription)")
+            return
+        }
+
+        self.activeLists.insert(newTaskList, at: 0)
+
+        ClaudeAPI.generateTasks(from: input) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let taskTitles):
+                    let newTasks = taskTitles.map { Task(title: $0) }
+                    newTaskList.tasks = newTasks
+
+                    do {
+                        try docRef.setData(from: newTaskList)
+                        self.loadActiveLists()
+                    } catch {
+                        print("🔥 Failed to update list with tasks: \(error.localizedDescription)")
+                    }
+
+                case .failure(let error):
+                    self.claudeErrorMessage = {
+                        switch error {
+                        case .invalidAPIKey:
+                            return "Your Claude API key is missing or invalid."
+                        case .networkError(let err):
+                            return "Network error: \(err.localizedDescription)"
+                        case .apiError(let msg):
+                            return "Claude API error: \(msg)"
+                        case .parsingError(let msg):
+                            return "Couldn’t understand Claude’s response. \(msg)"
+                        }
+                    }()
+                }
+            }
         }
     }
-    
-    // Add a task to a list
+
+    // ✅ Add a task to a list
     func addTask(to taskListId: String, taskTitle: String) {
         guard let index = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
-        
+
         let newTask = Task(
             title: taskTitle,
             isCompleted: false,
             createdAt: Date()
         )
-        
+
         activeLists[index].tasks.append(newTask)
-        
-        let updatedTasks = activeLists[index].tasks.map { [
-            "id": $0.id,
-            "title": $0.title,
-            "isCompleted": $0.isCompleted,
-            "createdAt": Timestamp(date: $0.createdAt)
-        ]}
-        
+
+        let updatedTasks = activeLists[index].tasks.map {
+            [
+                "id": $0.id,
+                "title": $0.title,
+                "isCompleted": $0.isCompleted,
+                "createdAt": Timestamp(date: $0.createdAt)
+            ]
+        }
+
         db.collection("taskLists").document(taskListId).updateData([
             "tasks": updatedTasks
         ])
     }
-    
-    // Toggle completion
+
+    // ✅ Toggle task complete
     func toggleTaskCompletion(taskListId: String, taskId: String) {
         guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
-        
+
         activeLists[listIndex].tasks[taskIndex].isCompleted.toggle()
-        
-        let updatedTasks = activeLists[listIndex].tasks.map { [
-            "id": $0.id,
-            "title": $0.title,
-            "isCompleted": $0.isCompleted,
-            "createdAt": Timestamp(date: $0.createdAt)
-        ]}
-        
+
+        let updatedTasks = activeLists[listIndex].tasks.map {
+            [
+                "id": $0.id,
+                "title": $0.title,
+                "isCompleted": $0.isCompleted,
+                "createdAt": Timestamp(date: $0.createdAt)
+            ]
+        }
+
         db.collection("taskLists").document(taskListId).updateData([
             "tasks": updatedTasks
         ])
     }
-    
-    // Archive a task list
+
+    // ✅ Archive a list
     func archiveTaskList(_ listId: String) {
         let ref = db.collection("taskLists").document(listId)
-        
+
         ref.updateData(["isArchived": true]) { error in
             if let error = error {
                 print("Error archiving task list: \(error.localizedDescription)")
@@ -121,8 +155,8 @@ class TaskListViewModel: ObservableObject {
             }
         }
     }
-    
-    // Delete a task list
+
+    // ✅ Delete a list
     func deleteTaskList(listId: String) {
         db.collection("taskLists").document(listId).delete { error in
             if let error = error {
@@ -134,21 +168,23 @@ class TaskListViewModel: ObservableObject {
             }
         }
     }
-    
-    // Delete a specific task
+
+    // ✅ Delete a task
     func deleteTask(taskListId: String, taskId: String) {
         guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
-        
+
         activeLists[listIndex].tasks.remove(at: taskIndex)
-        
-        let updatedTasks = activeLists[listIndex].tasks.map { [
-            "id": $0.id,
-            "title": $0.title,
-            "isCompleted": $0.isCompleted,
-            "createdAt": Timestamp(date: $0.createdAt)
-        ]}
-        
+
+        let updatedTasks = activeLists[listIndex].tasks.map {
+            [
+                "id": $0.id,
+                "title": $0.title,
+                "isCompleted": $0.isCompleted,
+                "createdAt": Timestamp(date: $0.createdAt)
+            ]
+        }
+
         db.collection("taskLists").document(taskListId).updateData([
             "tasks": updatedTasks
         ]) { error in
@@ -157,18 +193,18 @@ class TaskListViewModel: ObservableObject {
             }
         }
     }
-    
-    // Helper to parse Firestore document
+
+    // ✅ Helper: Firestore → TaskList
     private func parseTaskList(document: QueryDocumentSnapshot) -> TaskList {
         let data = document.data()
-        
+
         let id = data["id"] as? String ?? document.documentID
         let title = data["title"] as? String ?? ""
         let isArchived = data["isArchived"] as? Bool ?? false
         let createdAtTimestamp = data["createdAt"] as? Timestamp ?? Timestamp()
         let createdAt = createdAtTimestamp.dateValue()
         let userId = data["userId"] as? String ?? ""
-        
+
         var tasks: [Task] = []
         if let taskDataArray = data["tasks"] as? [[String: Any]] {
             tasks = taskDataArray.map { taskData in
@@ -180,7 +216,7 @@ class TaskListViewModel: ObservableObject {
                 )
             }
         }
-        
+
         return TaskList(
             id: id,
             title: title,
