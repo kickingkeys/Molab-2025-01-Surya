@@ -43,20 +43,10 @@ class TaskListViewModel: ObservableObject {
             }
     }
 
-    func generateTaskListFromInput(input: String, title: String, idOverride: String? = nil) {
+    func generateTaskListFromInput(input: String, title: String, idOverride: String? = nil, completion: @escaping (TaskList?) -> Void) {
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         let newListId = idOverride ?? UUID().uuidString
         var newTaskList = TaskList(id: newListId, title: title, userId: userId)
-
-        let docRef = db.collection("taskLists").document(newTaskList.id)
-        do {
-            try docRef.setData(from: newTaskList)
-        } catch {
-            print("🔥 Failed to create new list: \(error.localizedDescription)")
-            return
-        }
-
-        self.activeLists.insert(newTaskList, at: 0)
 
         ClaudeAPI.generateTasks(from: input) { result in
             DispatchQueue.main.async {
@@ -65,11 +55,14 @@ class TaskListViewModel: ObservableObject {
                     let newTasks = taskTitles.map { Task(title: $0) }
                     newTaskList.tasks = newTasks
 
+                    let docRef = self.db.collection("taskLists").document(newTaskList.id)
                     do {
                         try docRef.setData(from: newTaskList)
-                        self.loadActiveLists()
+                        self.activeLists.insert(newTaskList, at: 0)
+                        completion(newTaskList)
                     } catch {
-                        print("🔥 Failed to update list with tasks: \(error.localizedDescription)")
+                        print("🔥 Failed to save list with tasks: \(error.localizedDescription)")
+                        completion(nil)
                     }
 
                 case .failure(let error):
@@ -85,8 +78,19 @@ class TaskListViewModel: ObservableObject {
                             return "Couldn’t understand Claude’s response. \(msg)"
                         }
                     }()
+                    completion(nil)
                 }
             }
+        }
+    }
+
+    func addNewList(_ taskList: TaskList) {
+        let docRef = db.collection("taskLists").document(taskList.id)
+        do {
+            try docRef.setData(from: taskList)
+            self.activeLists.insert(taskList, at: 0)
+        } catch {
+            print("🔥 Failed to save task list: \(error.localizedDescription)")
         }
     }
 
@@ -183,14 +187,12 @@ class TaskListViewModel: ObservableObject {
         }
     }
 
-    /// ✅ NEW: Archive all lists not created today
     func archiveOldLists() {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let now = Date()
+        let sixHours: TimeInterval = 60 * 60 * 6
 
         for list in activeLists {
-            let createdDay = calendar.startOfDay(for: list.createdAt)
-            if createdDay < today {
+            if now.timeIntervalSince(list.createdAt) > sixHours {
                 archiveTaskList(list.id)
             }
         }

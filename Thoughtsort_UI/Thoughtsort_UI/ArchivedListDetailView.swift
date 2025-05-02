@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 struct ArchivedListDetailView: View {
     var listId: String
     @EnvironmentObject private var taskListViewModel: TaskListViewModel
@@ -10,61 +9,57 @@ struct ArchivedListDetailView: View {
         taskListViewModel.archivedLists.first(where: { $0.id == listId })
     }
     
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        return formatter
+    }
+    
     var body: some View {
         ZStack {
-            ThemeColors.background
-                .ignoresSafeArea()
+            ThemeColors.background.ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
-                // Header with back button
+                // Header
                 HStack(alignment: .center) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(.blue)
-                            Text("Back")
-                                .foregroundColor(.blue)
-                        }
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(ThemeColors.textDark)
                     }
+                    Text("Back")
+                        .font(.system(size: 16))
+                        .foregroundColor(ThemeColors.textDark)
                     Spacer()
                 }
-                .padding(.top, 5)
-                .padding(.leading, 20)
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
                 
-                // Title and timestamp
+                // Title and date
                 if let list = taskList {
-                    VStack(alignment: .leading, spacing: 5) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(list.title)
-                            .font(.system(size: 28, weight: .medium))
+                            .font(ThemeTypography.titleLarge)
                             .foregroundColor(ThemeColors.textDark)
                         
-                        let dateFormatter: DateFormatter = {
-                            let formatter = DateFormatter()
-                            formatter.dateStyle = .long
-                            return formatter
-                        }()
                         Text("Created on \(dateFormatter.string(from: list.createdAt))")
-                            .font(.system(size: 14))
-                            .foregroundColor(ThemeColors.textDark)
+                            .font(ThemeTypography.caption)
+                            .foregroundColor(ThemeColors.textLight)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 15)
-                } else {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("List Details")
-                            .font(.system(size: 28, weight: .medium))
-                            .foregroundColor(ThemeColors.textDark)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 15)
+                    .padding(.top, 8)
                 }
                 
-                // Divider
+                // Dashed divider
                 Rectangle()
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color.clear)
                     .frame(height: 1)
+                    .overlay(
+                        Rectangle()
+                            .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                            .foregroundColor(ThemeColors.textDark.opacity(0.3))
+                    )
+                    .padding(.horizontal, 20)
                     .padding(.top, 10)
                 
                 // Task list
@@ -72,25 +67,18 @@ struct ArchivedListDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if let list = taskList {
                             ForEach(list.tasks) { task in
-                                HStack(spacing: 8) {
-                                    // Non-interactive checkbox
-                                    if task.isCompleted {
-                                        ZStack {
-                                            Circle()
-                                                .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
-                                                .frame(width: 16, height: 16)
-                                            
+                                HStack(spacing: 10) {
+                                    ZStack {
+                                        Circle()
+                                            .strokeBorder(ThemeColors.accent, lineWidth: 1)
+                                            .frame(width: 18, height: 18)
+                                        if task.isCompleted {
                                             Circle()
                                                 .fill(ThemeColors.accent)
                                                 .frame(width: 10, height: 10)
                                         }
-                                    } else {
-                                        Circle()
-                                            .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
-                                            .frame(width: 16, height: 16)
                                     }
                                     
-                                    // Task title
                                     Text(task.title)
                                         .font(.system(size: 16, weight: .medium))
                                         .foregroundColor(ThemeColors.textDark)
@@ -113,5 +101,3 @@ struct ArchivedListDetailView: View {
         .navigationBarBackButtonHidden(true)
     }
 }
-
-// Remove any other ArchivedListDetailView definitions in your project

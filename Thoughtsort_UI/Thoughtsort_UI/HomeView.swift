@@ -1,6 +1,6 @@
 //  HomeView.swift
 //  Thoughtsort_UI
-//  Updated on 2025-05-02 18:55 EDT
+//  Updated on 2025-05-02 19:30 EDT
 
 import SwiftUI
 import FirebaseAuth
@@ -168,13 +168,16 @@ struct HomeView: View {
                     showShortInputAlert = true
                 } else {
                     let title = formattedNewTaskListTitle()
-                    let newList = TaskList(title: title, userId: Auth.auth().currentUser?.uid ?? "unknown_user")
-                    navigateToListID = nil
-                    DispatchQueue.main.async {
-                        navigateToListID = newList.id
-                        print("🟠 Navigating to new list ID: \(newList.id)")
-                        taskListViewModel.generateTaskListFromInput(input: trimmed, title: title, idOverride: newList.id)
-                        taskText = ""
+                    let listId = UUID().uuidString
+                    let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
+
+                    taskListViewModel.generateTaskListFromInput(input: trimmed, title: title, idOverride: listId) { generatedList in
+                        if let list = generatedList {
+                            DispatchQueue.main.async {
+                                taskText = ""
+                                navigateToListID = list.id
+                            }
+                        }
                     }
                 }
             }) {

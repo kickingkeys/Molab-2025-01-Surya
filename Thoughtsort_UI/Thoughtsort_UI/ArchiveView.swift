@@ -2,59 +2,57 @@ import SwiftUI
 
 struct ArchiveView: View {
     @EnvironmentObject private var taskListViewModel: TaskListViewModel
-    @State private var showDetailView = false
-    @State private var selectedListId: String = ""
+    @State private var selectedListId: String?
+
+    // Formatter moved out of view hierarchy
+    private var archiveDateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        return formatter
+    }
 
     var body: some View {
-        ZStack {
-            ThemeColors.background
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                ThemeColors.background.ignoresSafeArea()
 
-            VStack(alignment: .leading, spacing: 0) {
-                // Title and count
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Archive")
-                        .font(.system(size: 28, weight: .medium))
-                        .foregroundColor(ThemeColors.textDark)
+                VStack(alignment: .leading, spacing: 0) {
+                    // Title
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Archive")
+                            .font(.system(size: 28, weight: .medium))
+                            .foregroundColor(ThemeColors.textDark)
 
-                    Text("\(taskListViewModel.archivedLists.count) List item\(taskListViewModel.archivedLists.count == 1 ? "" : "s")")
-                        .font(.system(size: 14))
-                        .foregroundColor(ThemeColors.textDark)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-
-                // Divider
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(height: 1)
-                    .overlay(
-                        Rectangle()
-                            .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
-                            .foregroundColor(ThemeColors.textDark.opacity(0.3))
-                    )
+                        Text("\(taskListViewModel.archivedLists.count) List item\(taskListViewModel.archivedLists.count == 1 ? "" : "s")")
+                            .font(.system(size: 14))
+                            .foregroundColor(ThemeColors.textDark)
+                    }
                     .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                    .padding(.top, 20)
 
-                // Archived lists
-                ScrollView {
+                    // Dashed Divider
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 1)
+                        .overlay(
+                            Rectangle()
+                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                                .foregroundColor(ThemeColors.textDark.opacity(0.3))
+                        )
+                        .padding(.horizontal, 20)
+                        .padding(.top, 10)
+
+                    // List of Archived Items
                     if taskListViewModel.archivedLists.isEmpty {
                         Text("No archived lists yet.")
                             .foregroundColor(ThemeColors.textLight)
-                            .padding()
+                            .padding(.horizontal, 20)
+                            .padding(.top, 20)
+                        Spacer()
                     } else {
-                        VStack(spacing: 12) {
+                        List {
                             ForEach(taskListViewModel.archivedLists) { list in
-                                let dateFormatter: DateFormatter = {
-                                    let formatter = DateFormatter()
-                                    formatter.dateFormat = "MMMM d, yyyy"
-                                    return formatter
-                                }()
-
-                                Button(action: {
-                                    selectedListId = list.id
-                                    showDetailView = true
-                                }) {
+                                NavigationLink(value: list.id) {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(list.title)
                                             .font(.system(size: 16, weight: .medium))
@@ -62,37 +60,38 @@ struct ArchiveView: View {
 
                                         HStack(spacing: 4) {
                                             Text("\(list.tasks.count) Items")
-                                            Circle()
-                                                .frame(width: 4, height: 4)
+                                            Circle().frame(width: 4, height: 4)
                                             Text("\(list.completedCount) Completed")
-                                            Circle()
-                                                .frame(width: 4, height: 4)
-                                            Text("Created on \(dateFormatter.string(from: list.createdAt))")
+                                            Circle().frame(width: 4, height: 4)
+                                            Text("Created on \(archiveDateFormatter.string(from: list.createdAt))")
                                         }
                                         .font(.system(size: 12, weight: .medium))
                                         .foregroundColor(ThemeColors.textLight)
                                     }
-                                    .padding(12)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(ThemeColors.inputBackground)
-                                    .cornerRadius(12)
+                                    .padding(.vertical, 8)
+                                }
+                                .swipeActions {
+                                    Button(role: .destructive) {
+                                        taskListViewModel.deleteTaskList(listId: list.id)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
                                 }
                             }
+                            .listRowBackground(ThemeColors.inputBackground)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 15)
+                        .listStyle(.plain)
+                        .padding(.top, 10)
                     }
                 }
-
-                Spacer()
             }
-        }
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $showDetailView) {
-            ArchivedListDetailView(listId: selectedListId)
-        }
-        .onAppear {
-            taskListViewModel.listenToArchivedLists()
+            .navigationDestination(for: String.self) { listId in
+                ArchivedListDetailView(listId: listId)
+                    .environmentObject(taskListViewModel)
+            }
+            .onAppear {
+                taskListViewModel.listenToArchivedLists()
+            }
         }
     }
 }
