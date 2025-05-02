@@ -100,7 +100,7 @@ struct SettingsView: View {
                 Spacer()
             }
             .padding()
-            .background(Color.red)
+            .background(ThemeColors.accent) // changed from Color.red to ThemeColors.accent
             .cornerRadius(12)
         }
         .padding(.horizontal, 20)

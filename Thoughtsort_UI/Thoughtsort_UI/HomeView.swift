@@ -1,3 +1,8 @@
+//  HomeView.swift
+//  Thoughtsort_UI
+//
+//  Updated on 2025-05-02 18:40 EDT
+
 import SwiftUI
 import FirebaseAuth
 import Speech
@@ -19,23 +24,25 @@ struct HomeView: View {
     @State private var showClaudeErrorAlert = false
     @State private var navigateToListID: String?
 
+    @AppStorage("lastAutoArchiveDate") private var lastAutoArchiveDate: String = ""
+
     var body: some View {
         NavigationStack {
-            ZStack {
-                ThemeColors.background
-                    .ignoresSafeArea()
-
+            ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     headerView
                     dividerView
                     inputArea
                     actionButtons
                     listsSection
+                    Spacer(minLength: 30)
                 }
             }
+            .background(ThemeColors.background.ignoresSafeArea())
             .onAppear {
                 taskListViewModel.loadActiveLists()
                 requestSpeechAuthorization()
+                performAutoArchiveIfNeeded()
             }
             .navigationDestination(for: String.self) { listId in
                 TaskListView(taskListId: listId)
@@ -49,16 +56,27 @@ struct HomeView: View {
             } message: {
                 Text("Just type that.")
             }
-            .alert("Claude Error", isPresented: $showClaudeErrorAlert, actions: {
+            .alert("Claude Error", isPresented: $showClaudeErrorAlert) {
                 Button("I'll try again", role: .cancel) { }
-            }, message: {
+            } message: {
                 Text(taskListViewModel.claudeErrorMessage ?? "Something went wrong.")
-            })
+            }
             .onChange(of: taskListViewModel.claudeErrorMessage) { newValue in
                 if newValue != nil {
                     showClaudeErrorAlert = true
                 }
             }
+        }
+    }
+
+    private func performAutoArchiveIfNeeded() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayString = formatter.string(from: Date())
+
+        if lastAutoArchiveDate != todayString {
+            taskListViewModel.archiveOldLists()
+            lastAutoArchiveDate = todayString
         }
     }
 
@@ -131,12 +149,8 @@ struct HomeView: View {
     private var actionButtons: some View {
         HStack(spacing: 12) {
             Button(action: {
-                if isRecording {
-                    stopRecording()
-                } else {
-                    startRecording()
-                }
                 isRecording.toggle()
+                isRecording ? startRecording() : stopRecording()
             }) {
                 HStack {
                     Image(systemName: isRecording ? "stop.circle.fill" : "mic.fill")
@@ -162,10 +176,13 @@ struct HomeView: View {
                 } else {
                     let title = formattedNewTaskListTitle()
                     let newList = TaskList(title: title, userId: Auth.auth().currentUser?.uid ?? "unknown_user")
-                    navigateToListID = newList.id
-                    print("🟠 Navigating to new list ID: \(newList.id)")
-                    taskListViewModel.generateTaskListFromInput(input: trimmed, title: title, idOverride: newList.id)
-                    taskText = ""
+                    navigateToListID = nil
+                    DispatchQueue.main.async {
+                        navigateToListID = newList.id
+                        print("🟠 Navigating to new list ID: \(newList.id)")
+                        taskListViewModel.generateTaskListFromInput(input: trimmed, title: title, idOverride: newList.id)
+                        taskText = ""
+                    }
                 }
             }) {
                 HStack {
@@ -182,15 +199,6 @@ struct HomeView: View {
                 .opacity(taskText.isEmpty ? 0.5 : 1)
             }
             .disabled(taskText.isEmpty)
-            .navigationDestination(for: String.self) { id in
-                TaskListView(taskListId: id)
-                    .environmentObject(taskListViewModel)
-            }
-            .onChange(of: navigateToListID) { id in
-                if let id = id {
-                    print("✅ Trigger navigation to \(id)")
-                }
-            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 15)
@@ -305,7 +313,7 @@ struct HomeView: View {
         }
     }
 
-    func stopRecording() {
+    private func stopRecording() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()

@@ -6,7 +6,7 @@ import FirebaseAuth
 class TaskListViewModel: ObservableObject {
     @Published var activeLists: [TaskList] = []
     @Published var archivedLists: [TaskList] = []
-    @Published var claudeErrorMessage: String? = nil // ✅ Added
+    @Published var claudeErrorMessage: String? = nil
 
     private var db = Firestore.firestore()
 
@@ -15,7 +15,6 @@ class TaskListViewModel: ObservableObject {
         listenToArchivedLists()
     }
 
-    // ✅ Load Active Lists
     func loadActiveLists() {
         db.collection("taskLists")
             .whereField("isArchived", isEqualTo: false)
@@ -26,12 +25,10 @@ class TaskListViewModel: ObservableObject {
                     return
                 }
                 guard let documents = snapshot?.documents else { return }
-
                 self.activeLists = documents.map { self.parseTaskList(document: $0) }
             }
     }
 
-    // ✅ Load Archived Lists
     func listenToArchivedLists() {
         db.collection("taskLists")
             .whereField("isArchived", isEqualTo: true)
@@ -42,12 +39,10 @@ class TaskListViewModel: ObservableObject {
                     return
                 }
                 guard let documents = snapshot?.documents else { return }
-
                 self.archivedLists = documents.map { self.parseTaskList(document: $0) }
             }
     }
 
-    // ✅ Create a task list via Claude
     func generateTaskListFromInput(input: String, title: String, idOverride: String? = nil) {
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         let newListId = idOverride ?? UUID().uuidString
@@ -95,7 +90,6 @@ class TaskListViewModel: ObservableObject {
         }
     }
 
-    // ✅ Add a task to a list
     func addTask(to taskListId: String, taskTitle: String) {
         guard let index = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
 
@@ -121,7 +115,6 @@ class TaskListViewModel: ObservableObject {
         ])
     }
 
-    // ✅ Toggle task complete
     func toggleTaskCompletion(taskListId: String, taskId: String) {
         guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
@@ -142,10 +135,8 @@ class TaskListViewModel: ObservableObject {
         ])
     }
 
-    // ✅ Archive a list
     func archiveTaskList(_ listId: String) {
         let ref = db.collection("taskLists").document(listId)
-
         ref.updateData(["isArchived": true]) { error in
             if let error = error {
                 print("Error archiving task list: \(error.localizedDescription)")
@@ -156,7 +147,6 @@ class TaskListViewModel: ObservableObject {
         }
     }
 
-    // ✅ Delete a list
     func deleteTaskList(listId: String) {
         db.collection("taskLists").document(listId).delete { error in
             if let error = error {
@@ -169,7 +159,6 @@ class TaskListViewModel: ObservableObject {
         }
     }
 
-    // ✅ Delete a task
     func deleteTask(taskListId: String, taskId: String) {
         guard let listIndex = activeLists.firstIndex(where: { $0.id == taskListId }) else { return }
         guard let taskIndex = activeLists[listIndex].tasks.firstIndex(where: { $0.id == taskId }) else { return }
@@ -194,7 +183,19 @@ class TaskListViewModel: ObservableObject {
         }
     }
 
-    // ✅ Helper: Firestore → TaskList
+    /// ✅ NEW: Archive all lists not created today
+    func archiveOldLists() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        for list in activeLists {
+            let createdDay = calendar.startOfDay(for: list.createdAt)
+            if createdDay < today {
+                archiveTaskList(list.id)
+            }
+        }
+    }
+
     private func parseTaskList(document: QueryDocumentSnapshot) -> TaskList {
         let data = document.data()
 
