@@ -9,6 +9,7 @@ class TaskListViewModel: ObservableObject {
     @Published var claudeErrorMessage: String? = nil
 
     private var db = Firestore.firestore()
+    private var hasArchivedToday = false  // ✅ Run archive only once per day
 
     init() {
         loadActiveLists()
@@ -48,17 +49,27 @@ class TaskListViewModel: ObservableObject {
         let newListId = idOverride ?? UUID().uuidString
         var newTaskList = TaskList(id: newListId, title: title, userId: userId)
 
+        // ✅ Insert placeholder immediately
+        activeLists.insert(newTaskList, at: 0)
+        let docRef = db.collection("taskLists").document(newTaskList.id)
+
+        do {
+            try docRef.setData(from: newTaskList)
+        } catch {
+            print("🔥 Failed to create list placeholder: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+
         ClaudeAPI.generateTasks(from: input) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let taskTitles):
                     let newTasks = taskTitles.map { Task(title: $0) }
                     newTaskList.tasks = newTasks
-
-                    let docRef = self.db.collection("taskLists").document(newTaskList.id)
                     do {
                         try docRef.setData(from: newTaskList)
-                        self.activeLists.insert(newTaskList, at: 0)
+                        self.loadActiveLists()
                         completion(newTaskList)
                     } catch {
                         print("🔥 Failed to save list with tasks: \(error.localizedDescription)")
@@ -188,16 +199,36 @@ class TaskListViewModel: ObservableObject {
     }
 
     func archiveOldLists() {
-        let now = Date()
-        let sixHours: TimeInterval = 60 * 60 * 6
+        guard !hasArchivedToday else {
+            print("🟡 Skipping archive: already ran today.")
+            return
+        }
+
+        print("📆 Running archiveOldLists()...")
+
+        let calendar = Calendar(identifier: .gregorian)
+        let currentDayStart = calendar.startOfDay(for: Date())
+        print("🔸 Current local day start: \(currentDayStart)")
 
         for list in activeLists {
-            if now.timeIntervalSince(list.createdAt) > sixHours {
+            let listDayStart = calendar.startOfDay(for: list.createdAt)
+            print("""
+            📝 Checking list: \(list.title)
+            └ createdAt: \(list.createdAt)
+            └ dayStart:  \(listDayStart)
+            """)
+
+            if listDayStart < currentDayStart {
+                print("⏳ Archiving list: \(list.title) — created before today.")
                 archiveTaskList(list.id)
+            } else {
+                print("✅ Keeping list: \(list.title) — created today.")
             }
         }
-    }
 
+        hasArchivedToday = true
+    }
+    
     private func parseTaskList(document: QueryDocumentSnapshot) -> TaskList {
         let data = document.data()
 

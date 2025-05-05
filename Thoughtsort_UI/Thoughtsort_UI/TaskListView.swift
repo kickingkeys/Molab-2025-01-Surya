@@ -7,13 +7,14 @@ import SwiftUI
 
 struct TaskListView: View {
     var taskListId: String = ""
-    
+
     @EnvironmentObject private var taskListViewModel: TaskListViewModel
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var newTaskTitle = ""
     @FocusState private var isTextFieldFocused: Bool
-    @State private var isGenerating = false
+    @State private var isGenerating = true
+    @State private var claudeFailed = false
 
     private var taskList: TaskList? {
         taskListViewModel.activeLists.first(where: { $0.id == taskListId })
@@ -23,9 +24,8 @@ struct TaskListView: View {
         ZStack {
             ThemeColors.background
                 .ignoresSafeArea()
-            
+
             VStack(alignment: .leading, spacing: 0) {
-                
                 // Header
                 VStack(alignment: .leading, spacing: 5) {
                     Button(action: {
@@ -40,7 +40,7 @@ struct TaskListView: View {
                     Text("Tasks")
                         .font(.system(size: 28, weight: .medium))
                         .foregroundColor(ThemeColors.textDark)
-                    
+
                     if let createdAt = taskList?.createdAt {
                         Text("Edited on \(formattedDateTime(date: createdAt))")
                             .font(.system(size: 14))
@@ -71,12 +71,12 @@ struct TaskListView: View {
                                 RoundedRectangle(cornerRadius: 4)
                                     .stroke(ThemeColors.accent, lineWidth: 0.5)
                             )
-                        
+
                         Image(systemName: "plus")
                             .font(.system(size: 10))
                             .foregroundColor(ThemeColors.accent)
                     }
-                    
+
                     TextField("Add a new task...", text: $newTaskTitle)
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(ThemeColors.textDark)
@@ -104,7 +104,9 @@ struct TaskListView: View {
                                     .padding(.top, 50)
                                     .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    Text("No tasks yet. Start by adding one!")
+                                    Text(claudeFailed
+                                         ? "Couldn’t auto-generate tasks. You can add them manually below."
+                                         : "No tasks yet. Start by adding one!")
                                         .foregroundColor(ThemeColors.textLight)
                                         .padding(.top, 50)
                                         .frame(maxWidth: .infinity, alignment: .center)
@@ -117,7 +119,7 @@ struct TaskListView: View {
                                                 Circle()
                                                     .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
                                                     .frame(width: 16, height: 16)
-                                                
+
                                                 Circle()
                                                     .fill(ThemeColors.accent)
                                                     .frame(width: 10, height: 10)
@@ -127,7 +129,7 @@ struct TaskListView: View {
                                                 .strokeBorder(ThemeColors.accent, lineWidth: 0.5)
                                                 .frame(width: 16, height: 16)
                                         }
-                                        
+
                                         Text(task.title)
                                             .font(.system(size: 16, weight: .medium))
                                             .foregroundColor(ThemeColors.textDark)
@@ -173,10 +175,10 @@ struct TaskListView: View {
                         .font(.system(size: 14))
                         .foregroundColor(ThemeColors.textLight)
                         .padding(.top, 10)
-                    
+
                     HStack {
                         Spacer()
-                        
+
                         Button(action: {
                             if let id = taskList?.id {
                                 taskListViewModel.archiveTaskList(id)
@@ -206,13 +208,20 @@ struct TaskListView: View {
         .onAppear {
             taskListViewModel.loadActiveLists()
 
-            // Detect Claude-generated empty list
             if let list = taskListViewModel.activeLists.first(where: { $0.id == taskListId }) {
                 isGenerating = list.tasks.isEmpty
             }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+                // If still no tasks after 4 seconds, assume Claude failed
+                if taskListViewModel.activeLists.first(where: { $0.id == taskListId })?.tasks.isEmpty == true {
+                    isGenerating = false
+                    claudeFailed = true
+                }
+            }
         }
     }
-    
+
     private func addNewTask() {
         if !taskListId.isEmpty && !newTaskTitle.isEmpty {
             taskListViewModel.addTask(to: taskListId, taskTitle: newTaskTitle)
@@ -220,7 +229,7 @@ struct TaskListView: View {
             isTextFieldFocused = false
         }
     }
-    
+
     private func formattedDateTime(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM d, yyyy, h:mm a"

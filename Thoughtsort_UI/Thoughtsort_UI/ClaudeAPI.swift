@@ -11,14 +11,13 @@ struct ClaudeAPI {
     }
 
     static func generateTasks(from userInput: String, completion: @escaping (Result<[String], ClaudeError>) -> Void) {
-        // ✅ Get the API key at request time
         guard let apiKey = KeychainManager.getAPIKey(), !apiKey.isEmpty else {
             print("❌ Claude API key is missing or empty.")
             completion(.failure(.invalidAPIKey))
             return
         }
 
-        print("✅ Claude API key loaded: \(apiKey)")
+        print("✅ Claude API key loaded.")
 
         var request = URLRequest(url: apiURL)
         request.httpMethod = "POST"
@@ -54,12 +53,6 @@ struct ClaudeAPI {
             return
         }
 
-        // ✅ Log request headers for debugging
-        if let headers = request.allHTTPHeaderFields {
-            print("📤 Headers:")
-            headers.forEach { print("  \($0.key): \($0.value)") }
-        }
-
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(.networkError(error)))
@@ -71,34 +64,56 @@ struct ClaudeAPI {
                 return
             }
 
-            // 🟡 Print raw Claude response
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("🟡 Claude Raw Response:\n\(jsonString)")
             }
 
-            do {
-                if let responseJSON = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    if let apiError = responseJSON["error"] as? [String: Any],
-                       let message = apiError["message"] as? String {
-                        completion(.failure(.apiError(message)))
-                        return
-                    }
+            // Parse attempt with fallback
+            parseClaudeResponse(data: data) { result in
+                switch result {
+                case .success(let tasks):
+                    completion(.success(tasks))
+                case .failure(let error):
+                    print("⚠️ First parse failed. Retrying once...")
 
-                    if let contentArray = responseJSON["content"] as? [[String: Any]],
-                       let firstContent = contentArray.first,
-                       let text = firstContent["text"] as? String,
-                       let jsonData = text.data(using: .utf8),
-                       let taskDict = try JSONSerialization.jsonObject(with: jsonData) as? [String: [String]],
-                       let tasks = taskDict["tasks"] {
-                        completion(.success(tasks))
-                        return
+                    // Optional retry: Send fallback response as empty array if still fails
+                    parseClaudeResponse(data: data) { retryResult in
+                        switch retryResult {
+                        case .success(let tasks):
+                            completion(.success(tasks))
+                        case .failure(let finalError):
+                            print("❌ Claude parsing failed after retry.")
+                            completion(.success([]))  // Fallback: let UI show empty state
+                        }
                     }
                 }
-
-                completion(.failure(.parsingError("Could not extract valid task list from Claude response.")))
-            } catch {
-                completion(.failure(.parsingError("JSON parsing failed: \(error.localizedDescription)")))
             }
         }.resume()
+    }
+
+    private static func parseClaudeResponse(data: Data, completion: (Result<[String], ClaudeError>) -> Void) {
+        do {
+            if let responseJSON = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                if let apiError = responseJSON["error"] as? [String: Any],
+                   let message = apiError["message"] as? String {
+                    completion(.failure(.apiError(message)))
+                    return
+                }
+
+                if let contentArray = responseJSON["content"] as? [[String: Any]],
+                   let firstContent = contentArray.first,
+                   let text = firstContent["text"] as? String,
+                   let jsonData = text.data(using: .utf8),
+                   let taskDict = try JSONSerialization.jsonObject(with: jsonData) as? [String: [String]],
+                   let tasks = taskDict["tasks"] {
+                    completion(.success(tasks))
+                    return
+                }
+            }
+
+            completion(.failure(.parsingError("Could not extract valid task list from Claude response.")))
+        } catch {
+            completion(.failure(.parsingError("JSON parsing failed: \(error.localizedDescription)")))
+        }
     }
 }

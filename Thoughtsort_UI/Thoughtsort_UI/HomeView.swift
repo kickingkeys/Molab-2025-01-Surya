@@ -1,7 +1,3 @@
-//  HomeView.swift
-//  Thoughtsort_UI
-//  Updated on 2025-05-02 19:30 EDT
-
 import SwiftUI
 import FirebaseAuth
 import Speech
@@ -41,6 +37,11 @@ struct HomeView: View {
                 taskListViewModel.loadActiveLists()
                 requestSpeechAuthorization()
                 taskListViewModel.archiveOldLists()
+
+                print("📋 Active Lists:")
+                for list in taskListViewModel.activeLists {
+                    print("• \(list.title) — \(list.tasks.count) tasks")
+                }
             }
             .navigationDestination(for: String.self) { listId in
                 TaskListView(taskListId: listId)
@@ -170,13 +171,11 @@ struct HomeView: View {
                     let title = formattedNewTaskListTitle()
                     let listId = UUID().uuidString
                     let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
+                    navigateToListID = listId
 
                     taskListViewModel.generateTaskListFromInput(input: trimmed, title: title, idOverride: listId) { generatedList in
-                        if let list = generatedList {
-                            DispatchQueue.main.async {
-                                taskText = ""
-                                navigateToListID = list.id
-                            }
+                        DispatchQueue.main.async {
+                            taskText = ""
                         }
                     }
                 }
@@ -215,55 +214,56 @@ struct HomeView: View {
                 .font(.system(size: 28, weight: .medium))
                 .foregroundColor(ThemeColors.textDark)
                 .padding(.top, 30)
-                .padding(.horizontal, 20)
 
             if taskListViewModel.activeLists.isEmpty {
                 Text("No task lists found. Start by creating one!")
                     .font(.system(size: 16))
                     .foregroundColor(ThemeColors.textLight)
                     .padding(.top, 10)
-                    .padding(.horizontal, 20)
             } else {
-                List {
+                VStack(spacing: 12) {
                     ForEach(taskListViewModel.activeLists.sorted { $0.createdAt > $1.createdAt }) { list in
                         NavigationLink(destination: TaskListView(taskListId: list.id)
                             .environmentObject(taskListViewModel)) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(formattedTaskListTitle(list: list))
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(ThemeColors.textDark)
-                                    HStack(spacing: 4) {
-                                        Text("\(list.tasks.count) Items")
-                                        Text("•")
-                                        Text("\(list.tasks.filter { $0.isCompleted }.count) Completed")
-                                        Text("•")
-                                        Text("Last edited \(list.createdAt, style: .time)")
-                                    }
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(ThemeColors.textLight)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(formattedTaskListTitle(list: list))
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(ThemeColors.textDark)
+
+                                HStack(spacing: 4) {
+                                    Text("\(list.tasks.count) Items")
+                                    Text("•")
+                                    Text("\(list.tasks.filter { $0.isCompleted }.count) Completed")
+                                    Text("•")
+                                    Text("Last edited \(list.createdAt, style: .time)")
                                 }
-                                .padding(8)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(ThemeColors.textLight)
                             }
-                            .listRowBackground(ThemeColors.background)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button {
-                                    taskListViewModel.archiveTaskList(list.id)
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        taskListViewModel.loadActiveLists()
-                                    }
-                                } label: {
-                                    Label("Archive", systemImage: "archivebox")
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(ThemeColors.inputBackground)
+                            .cornerRadius(12)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                taskListViewModel.archiveTaskList(list.id)
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    taskListViewModel.loadActiveLists()
                                 }
-                                .tint(.orange)
+                            } label: {
+                                Label("Archive", systemImage: "archivebox")
                             }
+                            .tint(.orange)
+                        }
                     }
                 }
-                .listStyle(PlainListStyle())
-                .scrollContentBackground(.hidden)
-                .background(ThemeColors.background)
             }
         }
+        .padding(.horizontal, 20)
     }
+        
+    
 
     private func formattedNewTaskListTitle() -> String {
         let formatter = DateFormatter()

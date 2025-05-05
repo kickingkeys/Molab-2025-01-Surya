@@ -8,7 +8,8 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             if isShowingSplash {
-                LaunchScreen()
+                splashOverlay
+                    .transition(.opacity)
             } else if sessionManager.isLoading {
                 ProgressView("Loading...")
                     .progressViewStyle(CircularProgressViewStyle())
@@ -19,21 +20,24 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // debugPrintFonts() // 🛑 Commented out to reduce console log noise
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                withAnimation {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { // Fade out after 1.5s
+                withAnimation(.easeOut(duration: 0.5)) {
                     isShowingSplash = false
                 }
             }
         }
     }
-    
-    // Debug helper
-    func debugPrintFonts() {
-        for family in UIFont.familyNames.sorted() {
-            print("Font family: \(family)")
-            for font in UIFont.fontNames(forFamilyName: family).sorted() {
-                print("- \(font)")
+
+    private var splashOverlay: some View {
+        ZStack {
+            Color.white.ignoresSafeArea()
+            VStack(spacing: 12) {
+                Image("AppIcon")
+                    .resizable()
+                    .frame(width: 100, height: 100)
+                Text("thoughtsort")
+                    .font(.custom("PPEditorialNew-Regular", size: 28))
+                    .foregroundColor(Color(red: 0.32, green: 0.32, blue: 0.32))
             }
         }
     }
